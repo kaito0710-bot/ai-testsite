@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Claude Code × Blender 連携 解説</title>
+<style>
+  :root{
+    --bg-dark:#0F172A;
+    --bg-light:#FFFFFF;
+    --bg-panel:#F1F5F9;
+    --primary:#1E293B;
+    --body:#334155;
+    --muted:#64748B;
+    --rule:#CBD5E1;
+    --accent:#EA580C;
+    --accent-soft:#FED7AA;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:#0b1220; color:var(--body);
+    font-family:'Calibri','Segoe UI','Hiragino Kaku Gothic ProN','Yu Gothic UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* スライドは 1280x720 に固定し、はみ出し防止 */
+  .deck{
+    display:flex; flex-direction:column; align-items:center;
+    gap:24px; padding:24px 0 80px;
+  }
+  .slide{
+    position:relative; width:1280px; height:720px;
+    background:var(--bg-light);
+    box-shadow:0 12px 40px rgba(0,0,0,.45);
+    overflow:hidden;
+    border-radius:6px;
+  }
+  .slide.dark{background:var(--bg-dark); color:var(--white)}
+  h1,h2,h3,h4{font-family:'Georgia','Hiragino Mincho ProN','Yu Mincho',serif; color:var(--primary)}
+  .dark h1, .dark h2, .dark h3, .dark h4{color:var(--white)}
+  .eyebrow{
+    font-size:13px; font-weight:700; letter-spacing:.18em;
+    color:var(--accent); text-transform:uppercase;
+  }
+  .footer{
+    position:absolute; left:60px; right:60px; bottom:36px;
+    display:flex; justify-content:space-between;
+    color:var(--muted); font-size:11px;
+  }
+  .accent-rule{ width:80px; height:3px; background:var(--accent); border:0; margin:8px 0 0 }
+  code, .mono{ font-family:'Consolas','SF Mono','Menlo',monospace }
+
+  /* ===== Slide 1 (title) ===== */
+  .s1 .blob{
+    position:absolute; right:-200px; top:-200px;
+    width:760px; height:760px; border-radius:50%;
+    background:rgba(234,88,12,.25);
+  }
+  .s1 .blob2{
+    position:absolute; right:80px; top:80px;
+    width:380px; height:380px; border-radius:50%;
+    background:rgba(234,88,12,.5);
+  }
+  .s1 .content{ position:absolute; left:80px; top:140px; right:520px }
+  .s1 .ribbon{ color:var(--accent-soft); letter-spacing:.32em }
+  .s1 h1{
+    font-size:80px; line-height:1.05; font-weight:800;
+    color:var(--white); margin-top:34px;
+  }
+  .s1 .sub{ margin-top:38px; font-size:22px; color:var(--rule)}
+  .s1 .meta-line{ margin-top:54px; height:3px; width:140px; background:var(--accent)}
+  .s1 .meta{ margin-top:18px; color:var(--rule); font-size:14px }
+  .s1 .date{ position:absolute; left:80px; bottom:60px; color:var(--muted); font-size:12px}
+
+  /* ===== Common content slide ===== */
+  .head{
+    padding:54px 60px 0;
+  }
+  .head h2{ font-size:40px; font-weight:700; margin-top:6px}
+  .lead{
+    margin:24px 60px 0; color:var(--body); font-size:16px;
+    font-style:italic;
+  }
+  .body{ padding:0 60px; margin-top:18px }
+
+  /* ===== Slide 2 (timeline) ===== */
+  .timeline{
+    margin-top:80px; position:relative; padding:0 30px; height:340px;
+  }
+  .timeline .line{
+    position:absolute; top:140px; left:120px; right:120px;
+    height:2px; background:var(--rule);
+  }
+  .nodes{ display:flex; justify-content:space-between; padding:0 80px; position:relative}
+  .node{ width:300px; text-align:center; position:relative}
+  .node .dot{
+    width:22px; height:22px; border-radius:50%;
+    background:var(--accent); border:3px solid #fff;
+    margin:130px auto 0;
+  }
+  .node .date{
+    position:absolute; left:0; right:0; top:88px;
+    color:var(--accent); font-weight:700; font-size:14px;
+  }
+  .node .title{
+    margin-top:14px; font-family:Georgia,serif; font-weight:700;
+    color:var(--primary); font-size:18px;
+  }
+  .node .desc{ margin-top:6px; font-size:12.5px; color:var(--body); line-height:1.55}
+  .timeline-foot{
+    margin:34px 60px 0; color:var(--muted); font-style:italic; font-size:13px;
+  }
+
+  /* ===== Slide 3 (MCP) ===== */
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:0 60px; margin-top:18px}
+  .col h3{ font-size:24px; font-weight:700}
+  .col .rule{ width:44px; height:3px; background:var(--accent); margin:8px 0 14px}
+  .col p{ font-size:14.5px; color:var(--body); line-height:1.7}
+  .num-list{ list-style:none; margin-top:24px; display:grid; gap:14px }
+  .num-list li{ display:grid; grid-template-columns:36px 1fr; gap:14px; align-items:start}
+  .num-list .num{
+    width:30px; height:30px; border-radius:50%; background:var(--accent);
+    color:#fff; font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+    margin-top:1px;
+  }
+  .num-list .t b{color:var(--primary)}
+  .num-list .t{ font-size:13.5px; color:var(--body)}
+
+  .callout{
+    background:var(--bg-panel); border-left:6px solid var(--accent);
+    padding:24px 28px; height:100%;
+  }
+  .callout .label{
+    color:var(--accent); font-weight:700; font-size:12px; letter-spacing:.18em;
+  }
+  .callout h3{ margin-top:8px; font-size:30px; line-height:1.2}
+  .callout p{ margin-top:18px; font-size:14.5px; color:var(--body); line-height:1.7}
+
+  /* ===== Slide 4 (architecture) ===== */
+  .arch{
+    display:grid; grid-template-columns:1fr 60px 1fr 60px 1fr;
+    gap:0; padding:0 60px; margin-top:42px; align-items:stretch;
+  }
+  .box{
+    height:280px; padding:24px 22px; border-radius:4px; position:relative;
+  }
+  .box .eyebrow{font-size:11.5px; letter-spacing:.18em}
+  .box h3{ font-size:24px; line-height:1.2; margin-top:6px}
+  .box p{ font-size:13px; line-height:1.6; margin-top:14px}
+  .box.client{ background:var(--primary); color:var(--white)}
+  .box.client .eyebrow{ color:var(--accent-soft)}
+  .box.client h3{ color:var(--white)}
+  .box.bridge{ background:var(--bg-panel); border:1px solid var(--rule)}
+  .box.bridge h3{ color:var(--primary)}
+  .box.bridge p{ color:var(--body)}
+  .box.target{ background:var(--accent); color:var(--white)}
+  .box.target h3{ color:var(--white)}
+  .arrow{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:var(--muted);
+  }
+  .arrow svg{ width:40px; height:18px }
+  .arrow .lbl{ margin-top:10px; color:var(--accent); font-weight:700; font-size:11.5px; text-align:center}
+
+  .note{
+    margin:24px 60px 0; background:var(--bg-panel); padding:14px 20px;
+    font-size:13px; color:var(--body); line-height:1.6;
+  }
+  .note b{ color:var(--primary)}
+  .note code{ color:var(--accent); background:transparent}
+
+  /* ===== Slide 5 (capabilities + setup) ===== */
+  .cap-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;
+  }
+  .cap{
+    background:var(--bg-panel); padding:14px 16px 14px 22px;
+    position:relative; min-height:108px;
+  }
+  .cap::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:5px;
+    background:var(--accent);
+  }
+  .cap h4{ font-family:Calibri,sans-serif; font-weight:700; color:var(--primary); font-size:14px}
+  .cap p{ margin-top:6px; font-size:12px; color:var(--body); line-height:1.55}
+
+  .setup{ display:grid; gap:14px; margin-top:14px}
+  .step{ display:grid; grid-template-columns:32px 1fr; gap:12px; align-items:start}
+  .step .n{
+    width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;
+  }
+  .step .t b{ color:var(--primary)}
+  .step .t{ font-size:12.5px; color:var(--body); line-height:1.55}
+  .term{
+    margin-top:18px; background:var(--bg-dark); color:var(--accent-soft);
+    padding:14px 18px; border-radius:4px;
+    font-family:Consolas,monospace; font-size:13.5px;
+  }
+  .term .prompt{ color:#94a3b8; margin-right:8px}
+  .caveat{
+    margin-top:10px; color:var(--muted); font-size:11.5px; font-style:italic;
+  }
+
+  /* ===== Slide 6 (summary) ===== */
+  .s6 .blob{
+    position:absolute; left:-160px; bottom:-160px;
+    width:520px; height:520px; border-radius:50%;
+    background:rgba(234,88,12,.18);
+  }
+  .s6 .head{ padding-top:68px}
+  .s6 h2{ color:var(--white); font-size:48px}
+  .summary{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:30px;
+    margin:60px 60px 0;
+  }
+  .sum .num{
+    font-family:Georgia,serif; font-size:64px; color:var(--accent); font-weight:700;
+    line-height:1;
+  }
+  .sum .rule{ width:52px; height:2px; background:var(--white); margin:14px 0}
+  .sum h3{ color:var(--white); font-size:20px}
+  .sum p{ margin-top:10px; color:var(--rule); font-size:13px; line-height:1.6}
+  .s6 .ref{
+    position:absolute; left:60px; right:60px; bottom:60px;
+    color:var(--rule); font-size:12px; border-top:1px solid #334155;
+    padding-top:12px;
+  }
+
+  /* Print */
+  @page{ size: 1280px 720px; margin:0 }
+  @media print{
+    html,body{background:#fff}
+    .deck{gap:0;padding:0}
+    .slide{box-shadow:none;border-radius:0;page-break-after:always}
+    .slide:last-child{page-break-after:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+<!-- ===== Slide 1 ===== -->
+<section class="slide dark s1">
+  <div class="blob"></div>
+  <div class="blob2"></div>
+  <div class="content">
+    <div class="eyebrow ribbon">TECH BRIEFING / 2026</div>
+    <h1>Claude Code から<br>Blender を操作する</h1>
+    <div class="sub">いつから可能になったのか / 何の技術で動いているのか</div>
+    <div class="meta-line"></div>
+    <div class="meta">Model Context Protocol  /  blender-mcp  /  TCP socket bridge</div>
+  </div>
+  <div class="date">作成: 2026-05  |  社内技術勉強会</div>
+</section>
+
+<!-- ===== Slide 2 — Timeline ===== -->
+<section class="slide">
+  <div class="head">
+    <div class="eyebrow">01 / TIMELINE</div>
+    <h2>いつから操作できるようになったのか</h2>
+  </div>
+  <div class="lead">
+    Anthropic の 2 つのリリースと、コミュニティ製サーバの登場が「ほぼ同時期」に重なったことで実現した。
+  </div>
+
+  <div class="timeline">
+    <div class="line"></div>
+    <div class="nodes">
+      <div class="node">
+        <div class="date">2024.11.25</div>
+        <div class="dot"></div>
+        <div class="title">MCP 公開</div>
+        <div class="desc">Anthropic が Model Context Protocol を<br>オープン仕様として公開</div>
+      </div>
+      <div class="node">
+        <div class="date">2025.02.24</div>
+        <div class="dot"></div>
+        <div class="title">Claude Code 登場</div>
+        <div class="desc">Anthropic がエージェント型 CLI を<br>リサーチプレビューとしてリリース</div>
+      </div>
+      <div class="node">
+        <div class="date">2025.03.07</div>
+        <div class="dot"></div>
+        <div class="title">blender-mcp 公開</div>
+        <div class="desc">Siddharth Ahuja 氏 (ahujasid) が<br>GitHub に MCP サーバを公開</div>
+      </div>
+    </div>
+  </div>
+  <div class="timeline-foot">
+    → 2026 年現在、Cursor / VS Code / Claude Desktop など主要 MCP クライアントで同様に利用可能
+  </div>
+
+  <div class="footer">
+    <span>Claude Code × Blender 連携  |  技術勉強会資料</span>
+    <span>2 / 6</span>
+  </div>
+</section>
+
+<!-- ===== Slide 3 — MCP ===== -->
+<section class="slide">
+  <div class="head">
+    <div class="eyebrow">02 / CORE TECHNOLOGY</div>
+    <h2>中核は Model Context Protocol (MCP)</h2>
+  </div>
+
+  <div class="two-col" style="margin-top:36px">
+    <div class="col">
+      <h3>MCP とは</h3>
+      <div class="rule"></div>
+      <p>
+        AI アシスタントと外部ツール / データを
+        <b style="color:var(--accent)">標準化された JSON-RPC</b> で接続するためのオープン仕様。<br>
+        「LLM ↔ 任意のアプリ」の繋ぎ込みを毎回作らず、サーバを一度書けば
+        任意の MCP クライアントから利用できる。
+      </p>
+      <ul class="num-list">
+        <li>
+          <span class="num">1</span>
+          <span class="t"><b>MCP Host / Client</b><br>Claude Code・Claude Desktop・Cursor など。LLM 側の実行環境。</span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span class="t"><b>MCP Server</b><br>ツール (function) を公開する側。今回の blender-mcp はここ。</span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span class="t"><b>Transport</b><br>stdio もしくは HTTP/SSE。Claude Code はローカル stdio が基本。</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col">
+      <div class="callout">
+        <div class="label">KEY IDEA</div>
+        <h3>「USB-C」のように<br>差し替え可能な接続層</h3>
+        <p>
+          Blender 用に書かれた MCP サーバは、そのまま Cursor からも
+          Claude Desktop からも呼べる。クライアントごとの個別実装が不要になり、
+          ツール側 (Blender) は「一度だけ」公開すれば良い。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Claude Code × Blender 連携  |  技術勉強会資料</span>
+    <span>3 / 6</span>
+  </div>
+</section>
+
+<!-- ===== Slide 4 — Architecture ===== -->
+<section class="slide">
+  <div class="head">
+    <div class="eyebrow">03 / ARCHITECTURE</div>
+    <h2>三層構成のブリッジ・アーキテクチャ</h2>
+  </div>
+  <div class="lead">
+    Claude Code → MCP サーバ → Blender アドオン、の 3 プロセスを 2 種の通信路で繋ぐ。
+  </div>
+
+  <div class="arch">
+    <div class="box client">
+      <div class="eyebrow">CLIENT (HOST)</div>
+      <h3>Claude Code</h3>
+      <p>ローカル CLI。<br>MCP クライアントとして<br>ツールを呼び出す。</p>
+    </div>
+    <div class="arrow">
+      <svg viewBox="0 0 40 18"><line x1="0" y1="9" x2="32" y2="9" stroke="#64748B" stroke-width="2"/><polygon points="32,4 40,9 32,14" fill="#64748B"/></svg>
+      <div class="lbl">stdio<br>(JSON-RPC)</div>
+    </div>
+    <div class="box bridge">
+      <div class="eyebrow" style="color:var(--accent)">BRIDGE</div>
+      <h3>blender-mcp<br>(Python / uvx)</h3>
+      <p>MCP サーバ実装。<br>stdio で受け取った要求を<br>TCP で Blender に転送。</p>
+    </div>
+    <div class="arrow">
+      <svg viewBox="0 0 40 18"><line x1="0" y1="9" x2="32" y2="9" stroke="#64748B" stroke-width="2"/><polygon points="32,4 40,9 32,14" fill="#64748B"/></svg>
+      <div class="lbl">TCP socket<br>:9876</div>
+    </div>
+    <div class="box target">
+      <div class="eyebrow" style="color:var(--white)">TARGET</div>
+      <h3>Blender Addon</h3>
+      <p>Blender 内で起動する<br>TCP ソケットサーバ<br>(localhost:9876)。</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>ポイント:</b> Blender API (<code>bpy</code>) はメインスレッド以外から呼べないため、
+    アドオンは <code>bpy.app.timers.register()</code> を使い、
+    受信コマンドを必ずメインスレッドへスケジュールしてから実行する。
+  </div>
+
+  <div class="footer">
+    <span>Claude Code × Blender 連携  |  技術勉強会資料</span>
+    <span>4 / 6</span>
+  </div>
+</section>
+
+<!-- ===== Slide 5 — Capabilities & Setup ===== -->
+<section class="slide">
+  <div class="head">
+    <div class="eyebrow">04 / CAPABILITIES</div>
+    <h2>できること & セットアップ</h2>
+  </div>
+
+  <div class="two-col" style="margin-top:24px">
+    <div class="col">
+      <h3 style="font-size:20px">Claude Code 経由でできる主な操作</h3>
+      <div class="cap-grid">
+        <div class="cap">
+          <h4>シーン・オブジェクト検査</h4>
+          <p>シーン階層、選択中オブジェクトの座標・属性を取得。</p>
+        </div>
+        <div class="cap">
+          <h4>オブジェクト操作</h4>
+          <p>プリミティブ生成、移動・回転・スケール・複製・削除。</p>
+        </div>
+        <div class="cap">
+          <h4>マテリアル制御</h4>
+          <p>ノードグラフ経由で色・粗さ・テクスチャを設定。</p>
+        </div>
+        <div class="cap">
+          <h4>任意 Python の実行</h4>
+          <p>bpy を使った任意スクリプトを Blender 内で実行。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3 style="font-size:20px">セットアップ手順</h3>
+      <div class="setup">
+        <div class="step"><span class="n">1</span><span class="t"><b>Blender アドオンを導入</b><br>addon.py を Blender に追加し、N パネルから Server を起動。</span></div>
+        <div class="step"><span class="n">2</span><span class="t"><b>Claude Code に登録</b><br>下記コマンド一発で MCP サーバを登録。</span></div>
+        <div class="step"><span class="n">3</span><span class="t"><b>対話で操作</b><br>「立方体を 10 個並べて」などの自然言語で操作開始。</span></div>
+      </div>
+      <div class="term"><span class="prompt">$</span>claude mcp add blender uvx blender-mcp</div>
+      <div class="caveat">※ uv (uvx) のインストールが前提。Blender 3.x / 4.x で動作確認実績あり。</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Claude Code × Blender 連携  |  技術勉強会資料</span>
+    <span>5 / 6</span>
+  </div>
+</section>
+
+<!-- ===== Slide 6 — Summary ===== -->
+<section class="slide dark s6">
+  <div class="blob"></div>
+  <div class="head">
+    <div class="eyebrow">05 / SUMMARY</div>
+    <h2>3 つの要点</h2>
+  </div>
+
+  <div class="summary">
+    <div class="sum">
+      <div class="num">01</div>
+      <div class="rule"></div>
+      <h3>実現は 2025 年春</h3>
+      <p>MCP (2024.11) → Claude Code (2025.02) → blender-mcp (2025.03) の流れで一気に整った。</p>
+    </div>
+    <div class="sum">
+      <div class="num">02</div>
+      <div class="rule"></div>
+      <h3>鍵は MCP</h3>
+      <p>標準化されたツール接続層により、「Claude が Blender を呼ぶ」が個別実装なしで成立。</p>
+    </div>
+    <div class="sum">
+      <div class="num">03</div>
+      <div class="rule"></div>
+      <h3>実体は TCP ブリッジ</h3>
+      <p>MCP サーバが stdio ⇄ TCP:9876 を変換し、Blender アドオンがメインスレッドで bpy を実行。</p>
+    </div>
+  </div>
+
+  <div class="ref">
+    参考:  github.com/ahujasid/blender-mcp  /  www.anthropic.com/news/model-context-protocol<br>
+    <span style="color:var(--muted); font-style:italic">Q & A / ご質問はチャットへ</span>
+  </div>
+</section>
+
+</div>
+
+<script>
+  // 矢印キー / Space で次のスライドへ
+  const slides = [...document.querySelectorAll('.slide')];
+  let idx = 0;
+  function go(i){
+    idx = Math.max(0, Math.min(slides.length-1, i));
+    slides[idx].scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  document.addEventListener('keydown', e => {
+    if(['ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); go(idx+1); }
+    if(['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); go(idx-1); }
+    if(e.key==='Home') go(0);
+    if(e.key==='End') go(slides.length-1);
+  });
+</script>
+</body>
+</html>

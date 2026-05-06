@@ -182,6 +182,17 @@ nav a:hover {
   font-size: 0.95rem;
 }
 
+a.tool-link {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--primary);
+  transition: color 0.2s;
+}
+
+a.tool-link:hover {
+  color: var(--primary);
+}
+
 .tool-status {
   font-size: 0.75rem;
   font-weight: 600;
