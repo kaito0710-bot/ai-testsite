@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blender × Claude Code — 積水ハウス BIENA 風モデリング検証 | AI Tech Lab</title>
+  <title>Blender × Claude Code — 内観LDKモデリング検証（積水ハウス リエゾン風） | AI Tech Lab</title>
   <link rel="stylesheet" href="style.css">
   <style>
     .case-hero {
@@ -131,32 +131,31 @@
   <main>
     <section class="case-hero">
       <span class="badge">Blender × Claude Code (MCP)</span>
-      <h1>実在モデルハウスを参考にした3Dモデリング検証<br>— 積水ハウス「BIENA（ビエナ）」風</h1>
-      <p class="meta">検証日: 2026-07-06 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ <a href="ldk-interior.html" style="color:var(--primary)">内観編（リエゾン風LDK）はこちら</a></p>
+      <h1>実在の内観写真を参考にした3Dモデリング検証<br>— 積水ハウス「リエゾン」風LDK</h1>
+      <p class="meta">検証日: 2026-07-06 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ <a href="biena-modeling.html" style="color:var(--primary)">外観編（BIENA風）はこちら</a></p>
     </section>
 
     <section class="section" style="padding-top:1rem">
       <h2>使用したプロンプト</h2>
       <div class="prompt-box">
         <div class="label">PROMPT</div>
-        <pre>fable5の性能を活用して、家をモデリングしたい。
-Blenderで新規のプロジェクトを起こして、下記の家をモデリングして。
-https://www.jutakutenjijo.com/housemakers/sekisuihouse/biena</pre>
+        <pre>また新規プロジェクトとして、今度は外観ではなく下記の内観をモデリングして
+https://www.sekisuihouse.co.jp/liaison/region_lia04/</pre>
       </div>
       <p style="max-width:900px;margin:1rem auto 0;font-size:0.88rem;color:var(--text-muted)">
-        ※ 参照ページは直接アクセスできなかったため（403）、Claude が Web 検索で BIENA の設計特徴を調査し、それをもとにモデリングを実行。
+        ※ 参照ページのメインビジュアル画像を取得・分析し、写真と同じ構図・要素で再現。
       </p>
     </section>
 
     <section class="section alt">
       <h2>結果（レンダリング）</h2>
       <figure class="result-figure">
-        <img src="images/biena_final.png" alt="積水ハウス BIENA 風モデルハウスの最終レンダリング" loading="lazy">
-        <figcaption>最終レンダリング — グレージュの本体＋ダークブロンズのキャンチレバーBOX構成</figcaption>
+        <img src="images/ldk_final.png" alt="積水ハウス リエゾン風LDK内観の最終レンダリング" loading="lazy">
+        <figcaption>最終レンダリング — 木張り天井×ライトオーク床の横長LDK。全面ガラス越しにウッドデッキと庭も再現</figcaption>
       </figure>
       <figure class="result-figure">
-        <img src="images/biena_check.png" alt="制作途中の検証レンダリング" loading="lazy">
-        <figcaption>制作途中の検証レンダリング（形状確認用）</figcaption>
+        <img src="images/ldk_check.png" alt="制作途中の検証レンダリング" loading="lazy">
+        <figcaption>制作途中の検証レンダリング — ミラーリング時にクッション等の小物が原点基準で飛ぶ問題が発生し、原点を修正して解決</figcaption>
       </figure>
     </section>
 
@@ -164,19 +163,19 @@ https://www.jutakutenjijo.com/housemakers/sekisuihouse/biena</pre>
       <h2>処理統計</h2>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="value">約9.8分</div>
+          <div class="value">約22分</div>
           <div class="label">AI処理時間（合計）</div>
         </div>
         <div class="stat-card">
-          <div class="value">3回</div>
+          <div class="value">1回</div>
           <div class="label">プロンプト数</div>
         </div>
         <div class="stat-card">
-          <div class="value">約4.8万</div>
+          <div class="value">約10.7万</div>
           <div class="label">出力トークン</div>
         </div>
         <div class="stat-card">
-          <div class="value">約777万</div>
+          <div class="value">約974万</div>
           <div class="label">入力トークン（累計）</div>
         </div>
         <div class="stat-card">
@@ -189,21 +188,21 @@ https://www.jutakutenjijo.com/housemakers/sekisuihouse/biena</pre>
         </div>
       </div>
       <p class="stats-note">
-        ※ セッションログ（トランスクリプト）から集計。入力トークンの大部分はプロンプトキャッシュからの読み込み（約740万トークン）で、実際の課金対象は大幅に少なくなります。処理時間はAIが応答・ツール実行していた時間の合計です。
+        ※ セッションログ（トランスクリプト）から集計（途中再開1回を含む）。入力トークンの大部分はプロンプトキャッシュからの読み込み（約924万トークン）で、実際の課金対象は大幅に少なくなります。処理時間はAIが応答・ツール実行していた時間の合計です。
       </p>
     </section>
 
     <section class="section alt">
-      <h2>再現した BIENA の特徴</h2>
+      <h2>再現した内観の特徴</h2>
       <ul class="feature-list">
-        <li><b>重量鉄骨3階建て・フラットルーフ</b> — 都市型の直方体コンポジション</li>
-        <li><b>BOXデザインの凹凸</b> — グレージュ本体＋ダークブロンズBOXの異素材構成</li>
-        <li><b>張り出しBOX＋細い鉄柱</b> — βシステム構法らしい大胆な持ち出し</li>
-        <li><b>2Fインナーバルコニー</b> — ガラス手すり＋黒笠木</li>
-        <li><b>大開口</b> — 1Fワイドリビング窓、2F横連窓、3FワイドFIX窓</li>
-        <li><b>白の全高アクセントフィン</b> — 玄関脇の縦基調</li>
-        <li><b>黒ハイドア玄関＋フラット庇</b> — 階見切りの水平リビールライン</li>
-        <li><b>外構</b> — アプローチ・芝・生垣・シンボルツリー</li>
+        <li><b>木張り天井×ライトオーク床</b> — 開放的な横長LDK</li>
+        <li><b>黒スリムサッシの全面ガラス</b> — 左面いっぱい＋白い構造柱</li>
+        <li><b>屋外まで再現</b> — ウッドデッキ・横格子フェンス・庭の緑・デッキチェア</li>
+        <li><b>ロー・モジュールソファ</b> — ベージュ本体＋ネイビー／オレンジ／白／ティールのクッション</li>
+        <li><b>ネイビーのラグ＋楕円ローテーブル</b> — コーヒーカップ・木のおもちゃ付き</li>
+        <li><b>アイランドカウンター</b> — 長いオーク木目＋グレーシェードのテーブルランプ</li>
+        <li><b>キッチン</b> — セージグリーン吊戸棚・ブルーグレー壁・タイルバックスプラッシュ</li>
+        <li><b>ダイニング＋照明</b> — 丸テーブル＋チェア4脚、白い提灯型ペンダントライト</li>
       </ul>
       <div style="max-width:900px;margin:0 auto">
         <a class="back-link" href="index.html">← トップページに戻る</a>
