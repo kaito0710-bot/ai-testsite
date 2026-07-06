@@ -184,6 +184,38 @@
     .step h4 { font-size: 14px; color: #fff; font-weight: 700; }
     .step p { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
 
+    /* 統計 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .stat-card .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.2;
+    }
+    .stat-card .label {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .stats-note {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
     /* タグ */
     .tags {
       display: flex;
@@ -405,6 +437,40 @@
       </div>
     </div>
   </div>
+
+  <!-- 処理統計 -->
+  <div class="section-label" style="margin-top: 8px">Stats</div>
+  <div class="section-title">処理統計</div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="value">約10.5分</div>
+      <div class="label">AI処理時間（モデリング）</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">7回</div>
+      <div class="label">プロンプト数</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">約3.9万</div>
+      <div class="label">出力トークン</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">約516万</div>
+      <div class="label">入力トークン（累計）</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">約93%</div>
+      <div class="label">キャッシュ読込率</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">Sonnet 4.6</div>
+      <div class="label">使用モデル</div>
+    </div>
+  </div>
+  <p class="stats-note">
+    ※ セッションログ（トランスクリプト）から集計。モデリング作業（7プロンプト）のみの数値で、本ギャラリーページの制作・公開作業（約13.5分・出力 約4.1万トークン・入力 約865万トークン）は別途。入力トークンの大部分はプロンプトキャッシュからの読み込み（約478万トークン）で、実際の課金対象は大幅に少なくなります。
+  </p>
 
   <div class="tags" style="margin-bottom: 56px">
     <span class="tag">Claude Code</span>

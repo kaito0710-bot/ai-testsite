@@ -83,6 +83,37 @@
       font-size: 0.9rem;
     }
     .back-link:hover { text-decoration: underline; }
+    .stats-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.1rem 1.2rem;
+      text-align: center;
+    }
+    .stat-card .value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .stat-card .label {
+      margin-top: 0.35rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .stats-note {
+      max-width: 900px;
+      margin: 0.9rem auto 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -129,7 +160,40 @@ https://www.jutakutenjijo.com/housemakers/sekisuihouse/biena</pre>
       </figure>
     </section>
 
-    <section class="section">
+    <section class="section" style="padding-bottom:1rem">
+      <h2>処理統計</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="value">約9.8分</div>
+          <div class="label">AI処理時間（合計）</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">3回</div>
+          <div class="label">プロンプト数</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">約4.8万</div>
+          <div class="label">出力トークン</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">約777万</div>
+          <div class="label">入力トークン（累計）</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">約95%</div>
+          <div class="label">キャッシュ読込率</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">Fable 5</div>
+          <div class="label">使用モデル</div>
+        </div>
+      </div>
+      <p class="stats-note">
+        ※ セッションログ（トランスクリプト）から集計。入力トークンの大部分はプロンプトキャッシュからの読み込み（約740万トークン）で、実際の課金対象は大幅に少なくなります。処理時間はAIが応答・ツール実行していた時間の合計です。
+      </p>
+    </section>
+
+    <section class="section alt">
       <h2>再現した BIENA の特徴</h2>
       <ul class="feature-list">
         <li><b>重量鉄骨3階建て・フラットルーフ</b> — 都市型の直方体コンポジション</li>
