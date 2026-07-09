@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blender × Claude Code — 間取りデータからの完全プロシージャル住宅生成検証 | AI Tech Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .case-hero {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 2rem;
+    }
+    .case-hero h1 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+    .case-hero .meta {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .prompt-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .prompt-box .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+    .prompt-box pre {
+      white-space: pre-wrap;
+      font-family: 'Consolas', 'SF Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .result-figure {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+    }
+    .result-figure img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+    .result-figure figcaption {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .feature-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.75rem;
+      list-style: none;
+    }
+    .feature-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.88rem;
+    }
+    .feature-list li b { color: var(--primary); }
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .stats-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.1rem 1.2rem;
+      text-align: center;
+    }
+    .stat-card .value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .stat-card .label {
+      margin-top: 0.35rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .stats-note {
+      max-width: 900px;
+      margin: 0.9rem auto 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .fix-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      list-style: none;
+    }
+    .fix-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .fix-list li b { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo"><a href="index.html" style="color:inherit;text-decoration:none">AI Tech Lab</a></div>
+      <ul>
+        <li><a href="index.html#about">概要</a></li>
+        <li><a href="index.html#tools">検証ツール</a></li>
+        <li><a href="index.html#log">検証ログ</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="case-hero">
+      <span class="badge">Blender × Claude Code (MCP)</span>
+      <h1>間取りデータからの完全プロシージャル住宅生成検証<br>— 平屋LDK（外観・内観）</h1>
+      <p class="meta">検証日: 2026-07-09 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender 5.1 + blender-mcp ／ 関連: <a href="biena-modeling.html" style="color:var(--primary)">BIENA風モデリング（外観）</a>・<a href="ldk-interior.html" style="color:var(--primary)">リエゾン風LDK（内観）</a></p>
+    </section>
+
+    <section class="section" style="padding-top:1rem">
+      <h2>使用したプロンプト</h2>
+      <div class="prompt-box">
+        <div class="label">PROMPT</div>
+        <pre>Blender連携で住宅モデリングに関連して、Fable5でしか試せないことを試したい</pre>
+      </div>
+      <p style="max-width:900px;margin:1rem auto 0;font-size:0.88rem;color:var(--text-muted)">
+        ※ 参考画像・外部アセットを一切使わない検証。間取り（部屋割り・開口部の寸法リスト）を唯一の情報源とするPythonコードをAIが設計し、壁・建具・屋根・家具・照明・マテリアルまでを一括生成した。壁の開口とサッシが同一の数値から作られるため、構造的にズレが生じないのが特徴。
+      </p>
+    </section>
+
+    <section class="section alt">
+      <h2>結果（レンダリング）</h2>
+      <figure class="result-figure">
+        <img src="images/procedural_exterior.jpg" alt="プロシージャル生成した平屋住宅の外観。白い漆喰壁にスレートブルーの切妻屋根、南面に掃き出し窓とウッドデッキ" loading="lazy">
+        <figcaption>外観（南東より）— 切妻屋根の10×8m平屋。掃き出し窓の奥にキッチンが見えるのは、開口と間取りが同一データから生成されているため</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/procedural_interior.jpg" alt="プロシージャル生成したLDKの内観。板張りの床、アイランドキッチン、ペンダント照明、ダイニングセット、ソファ" loading="lazy">
+        <figcaption>内観（リビングよりキッチンを望む）— 家具・照明まで全てコード生成。床の板張りはブリックテクスチャによるプロシージャル表現</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" style="padding-bottom:1rem">
+      <h2>生成データ</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="value">10×8m</div>
+          <div class="label">建物規模（平屋・天井高2.7m）</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">162</div>
+          <div class="label">生成オブジェクト数</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">16</div>
+          <div class="label">マテリアル（全ノード生成）</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">10</div>
+          <div class="label">開口部（窓7・ドア3）</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">0</div>
+          <div class="label">外部アセット</div>
+        </div>
+        <div class="stat-card">
+          <div class="value">Fable 5</div>
+          <div class="label">使用モデル</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <h2>AIによる自己検証・修正ログ</h2>
+      <p style="max-width:900px;margin:0 auto 1.25rem;font-size:0.88rem;color:var(--text-muted)">
+        生成後、AIがビューポートのスクリーンショットを読み取って不具合を発見し、シーンへのレイキャスト（光線判定）で原因を物理的に特定して修正した。
+      </p>
+      <ul class="fix-list">
+        <li><b>天井際に黒い帯が出る</b> — レイキャストで正体を特定。屋根のSolidifyモディファイアが面法線の向きにより下向きに厚みを付け、屋根裏が室内側へ突き出していた。厚み方向を反転して解消。</li>
+        <li><b>屋根の妻側に白い筋</b> — 妻壁の上端が屋根下面と完全に同一平面となりZファイティングが発生。妻壁を3cm下げて解消。</li>
+        <li><b>太陽光が効いていないように見える</b> — 診断の結果ライト自体は正常で、影が建物の裏（北東）へ落ちる方位だったことが原因と判明。太陽をカメラ側の南東へ回して解消。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>アプローチの特徴</h2>
+      <ul class="feature-list">
+        <li><b>間取りの単一ソース化</b> — 部屋割り・開口寸法を数値リストで定義し全要素を導出</li>
+        <li><b>壁ビルダー関数</b> — 開口を避けて壁セグメントを自動分割生成</li>
+        <li><b>建具の自動整合</b> — サッシ・ガラス・ドアが開口と同じ数値から生成されズレない</li>
+        <li><b>全プロシージャルマテリアル</b> — 板張りフローリング含め16種をシェーダーノードで構築</li>
+        <li><b>LDK造作一式</b> — アイランドキッチン・ダイニング・ソファ・ペンダント3灯（実ライト付き）</li>
+        <li><b>日本語UI環境への対応</b> — ローカライズされたノード名を型検索で回避</li>
+      </ul>
+      <div style="max-width:900px;margin:0 auto">
+        <a class="back-link" href="index.html">← トップページに戻る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>AI Tech Lab &copy; 2026 — Built with Claude Code</p>
+  </footer>
+</body>
+</html>
