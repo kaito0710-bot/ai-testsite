@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blender × Claude Code — SUUMO掲載の実在マンション再現検証 | AI Tech Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .case-hero {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 2rem;
+    }
+    .case-hero h1 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+    .case-hero .meta {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .prompt-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto 1rem;
+    }
+    .prompt-box .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+    .prompt-box pre {
+      white-space: pre-wrap;
+      font-family: 'Consolas', 'SF Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .result-figure {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+    }
+    .result-figure img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+    .result-figure figcaption {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .feature-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.75rem;
+      list-style: none;
+    }
+    .feature-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.88rem;
+    }
+    .feature-list li b { color: var(--primary); }
+    .step-list {
+      max-width: 900px;
+      margin: 0 auto;
+      list-style: none;
+      counter-reset: step;
+    }
+    .step-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem 0.9rem 3.2rem;
+      font-size: 0.88rem;
+      margin-bottom: 0.6rem;
+      position: relative;
+      counter-increment: step;
+    }
+    .step-list li::before {
+      content: counter(step);
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-list li b { color: var(--primary); }
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo"><a href="index.html" style="color:inherit;text-decoration:none">AI Tech Lab</a></div>
+      <ul>
+        <li><a href="index.html#about">概要</a></li>
+        <li><a href="index.html#tools">検証ツール</a></li>
+        <li><a href="index.html#log">検証ログ</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="case-hero">
+      <span class="badge">Blender × Claude Code (MCP)</span>
+      <h1>SUUMO掲載の実在賃貸マンションを外観写真から再現<br>— 第2林マンション（大阪府寝屋川市）</h1>
+      <p class="meta">検証日: 2026-07-12 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ 参照: <a href="https://suumo.jp/library/tf_27/sc_27215/to_1000848588/" target="_blank" rel="noopener" style="color:var(--primary)">SUUMO物件ライブラリー（掲載ページ）</a></p>
+    </section>
+
+    <section class="section" style="padding-top:1rem">
+      <h2>使用したプロンプト</h2>
+      <div class="prompt-box">
+        <div class="label">PROMPT 1 — モデリング</div>
+        <pre>下記のマンションをBlenderで忠実に再現して
+https://suumo.jp/library/tf_27/sc_27215/to_1000848588/</pre>
+      </div>
+      <div class="prompt-box">
+        <div class="label">PROMPT 2 — 質感向上</div>
+        <pre>壁や窓のテクスチャをもっとフォトリアルにして</pre>
+      </div>
+      <div class="prompt-box">
+        <div class="label">PROMPT 3 — さらにフォトリアル化</div>
+        <pre>もっとフォトリアルにして</pre>
+      </div>
+      <p style="max-width:900px;margin:1rem auto 0;font-size:0.88rem;color:var(--text-muted)">
+        ※ AIがSUUMOの掲載ページから物件データ（RC造5階建・総戸数30戸・1980年3月築・南向きバルコニー・2LDK 49.5〜53㎡）と外観写真・間取り図を読み取り、
+        寸法を推定してBlenderのPythonスクリプトで一括生成。写真と同じ構図のカメラまで自動設定しています。
+        なお掲載写真そのものの転載は避け、本ページの画像はすべてAIが生成した3DCGレンダリングです。
+      </p>
+    </section>
+
+    <section class="section alt">
+      <h2>結果（レンダリング）</h2>
+      <figure class="result-figure">
+        <img src="images/mansion_photoreal.jpg" alt="第2林マンション再現モデルの最終フォトリアルレンダリング" loading="lazy">
+        <figcaption>最終レンダリング（Cycles・物理スカイ・実写相当露出）— 掲載外観写真と同じ南東からの構図</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_closeup.jpg" alt="エントランス付近の近景レンダリング" loading="lazy">
+        <figcaption>近景 — バルコニー隔て板・掃き出し窓・階段塔・エントランスまわりのディテール</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_eevee.jpg" alt="EEVEEによる中間段階のレンダリング" loading="lazy">
+        <figcaption>中間段階（EEVEE）— プロシージャルテクスチャ適用直後。住戸ごとにランダムな窓の表情（カーテン／暗い室内）を追加</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_v1.jpg" alt="初版のレンダリング" loading="lazy">
+        <figcaption>初版（形状確認）— 掲載データからの寸法割り出しと構図合わせの段階</figcaption>
+      </figure>
+    </section>
+
+    <section class="section">
+      <h2>再現した建物の特徴</h2>
+      <ul class="feature-list">
+        <li><b>RC造5階建・板状マンション</b> — 総戸数30戸から「6戸/階×5層」を割り出し、住戸幅6.6m・全長約40mで躯体を構成</li>
+        <li><b>南面の全戸連続バルコニー</b> — コンクリート手すり壁＋笠木、戸境の隔て板、LDK・洋室の掃き出し窓×2（間取り図の田の字プランを反映）</li>
+        <li><b>東端の階段塔</b> — 屋上に突出する塔屋と、各階に縦に並ぶ小窓、妻壁の縦樋</li>
+        <li><b>屋上の大型広告看板</b> — 緑のロゴ＋「典礼会館」の文字（日本語フォントで実文字入り）、縦型看板、高架水槽、屋上フェンス、TVアンテナ</li>
+        <li><b>エントランスまわり</b> — ガラスドア・庇・赤茶タイルの階段・青い自販機</li>
+        <li><b>外構と前景</b> — 緑メッシュフェンス（半透明）、白線入り駐車場、電柱と電線、カラーコーン</li>
+        <li><b>生活感の演出</b> — バルコニーに干された布団・洗濯物を写真の配置に合わせて再現</li>
+        <li><b>築45年の経年表現</b> — 吹付外壁の骨材バンプ・色ムラ・雨だれ・地際の黒ずみ</li>
+      </ul>
+    </section>
+
+    <section class="section alt">
+      <h2>フォトリアル化のプロセス</h2>
+      <p style="max-width:900px;margin:0 auto 1.5rem;font-size:0.9rem;color:var(--text-muted)">
+        3回のプロンプトで「形状の忠実再現 → 質感 → 光学的リアリティ」と段階的に品質を引き上げました。
+        途中で発生した不具合（全パーツが半分サイズで生成されるバグ、テクスチャ座標の縞、露出の白飛び）も、AIがレンダリング結果を自分で確認しながら修正しています。
+      </p>
+      <ol class="step-list">
+        <li><b>データ収集</b> — 掲載ページから構造・階数・戸数・間取りを取得し、外観写真から看板・階段塔・フェンス等のディテールを読み取り</li>
+        <li><b>一括モデリング</b> — Pythonスクリプトで躯体〜外構まで約460オブジェクトを生成。生成後に全パーツが半分サイズになるバグを発見し、429個を一括修正</li>
+        <li><b>プロシージャルテクスチャ</b> — 吹付タイル外壁（骨材バンプ＋色ムラ＋雨だれ）、住戸ごとにランダムな窓ガラス、アルミサッシ、アスファルト</li>
+        <li><b>物理ベース化</b> — レンダラーをCyclesへ変更、物理大気モデルの空、実測相当の太陽光（550W/㎡）、全442パーツへのベベル追加</li>
+        <li><b>露出の追い込み</b> — 白飛び→露出調整のイテレーションを4回実施し、「白い外壁は明るく・アスファルトは中間グレー」という実写カメラの輝度バランス（-5.5EV付近）に収束</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <div style="max-width:900px;margin:0 auto">
+        <a class="back-link" href="index.html">← トップページに戻る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>AI Tech Lab &copy; 2026 — Built with Claude Code</p>
+  </footer>
+</body>
+</html>
