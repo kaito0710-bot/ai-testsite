@@ -132,7 +132,7 @@
     <section class="case-hero">
       <span class="badge">Blender × Claude Code (MCP)</span>
       <h1>実在モデルハウスを参考にした3Dモデリング検証<br>— 積水ハウス「BIENA（ビエナ）」風</h1>
-      <p class="meta">検証日: 2026-07-06 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ <a href="ldk-interior.html" style="color:var(--primary)">内観編（リエゾン風LDK）はこちら</a></p>
+      <p class="meta">検証日: 2026-07-06（<a href="#update-20260712" style="color:var(--primary)">2026-07-12 大幅アップデート</a>）／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ <a href="ldk-interior.html" style="color:var(--primary)">内観編（リエゾン風LDK）はこちら</a></p>
     </section>
 
     <section class="section" style="padding-top:1rem">
@@ -206,6 +206,40 @@ https://www.jutakutenjijo.com/housemakers/sekisuihouse/biena</pre>
         <li><b>黒ハイドア玄関＋フラット庇</b> — 階見切りの水平リビールライン</li>
         <li><b>外構</b> — アプローチ・芝・生垣・シンボルツリー</li>
       </ul>
+    </section>
+
+    <section class="section" id="update-20260712">
+      <h2>アップデート（2026-07-12）— フォトリアル化・内観再現・構造修正</h2>
+      <p style="max-width:900px;margin:0 auto 1.5rem;font-size:0.9rem;color:var(--text-muted)">
+        初回掲載分（2026-07-06）のモデルをベースに、元サイトの外観・インテリア写真への忠実度を高める大規模アップデートを実施。
+        マテリアルの実写テクスチャ化、内観の作り込み、構造不整合の修正、レンダリングアングルの変更まで、すべて Claude Fable 5 との対話のみで完結しています。
+      </p>
+
+      <figure class="result-figure">
+        <img src="images/biena_v2_45deg.png" alt="アップデート後の最終レンダリング（右斜め45度）" loading="lazy">
+        <figcaption>最新レンダリング — 右斜め45度アングル。タイル外壁／白壁の描き分け、フォトスキャン樹木、ガラス越しの内観、カーポートの車まで再現</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/biena_v2_front.png" alt="元サイトと同じ正面アングルのレンダリング" loading="lazy">
+        <figcaption>元サイトの外観写真と同構図（街路レベル・シフトレンズで垂直線を平行に）</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/biena_v2_interior.png" alt="内観再現とガラス透過の検証レンダリング" loading="lazy">
+        <figcaption>内観再現の中間段階 — 「インテリア」タブの写真を基に 2F LDK / 3F ペントハウスを造作し、ガラス越しに見えるよう調整</figcaption>
+      </figure>
+
+      <h3 style="max-width:900px;margin:2rem auto 1rem;font-size:1.05rem">主な更新内容</h3>
+      <ul class="feature-list">
+        <li><b>外壁のPBRテクスチャ化</b> — Poly Haven の実写テクスチャ＋プロシージャル目地で、45×22.5cm の小口タイル（縦リブ・馬目地）を表現。「茶色いタイルの塔・棟」と「白い本体」を写真どおりに描き分け</li>
+        <li><b>構造不整合の修正</b> — 壁内に埋没していた2Fバルコニーの掘り込み、支柱の追加、3F出隅の隙間封鎖、フィン壁の浮き・ドアのめり込み解消など計10箇所以上</li>
+        <li><b>内観の忠実再現</b> — 元サイト「インテリア」タブの写真3枚を参照し、2F LDK（ソファ・ラグ・ダイニング・キッチン・アクセントウォール）と3Fペントハウス（白ソファ・黒チェア・暖炉壁・ウッドデッキ）を造作</li>
+        <li><b>ガラスの透過表現</b> — 透明BSDF＋視線角度連動の弱い反射というアーキビズ定番シェーダーに置き換え、昼景でも室内が見える「イイ感じの透け感」を実現</li>
+        <li><b>フォトスキャン植栽</b> — ローポリ樹木を Poly Haven のジャカランダ＋広葉樹に置換。室内の鉢植えもアンスリウム／カラテアの実写スキャンモデルに</li>
+        <li><b>カーポートの車を再現</b> — ホイールアーチのくり抜き、ミラー・グリル・バンパー等を備えたシルバーワゴンをプリミティブから造形</li>
+        <li><b>照明のHDRI化</b> — Poly Haven の晴天HDRIをパックし、太陽方向をアングルに合わせて最適化。室内はエリアライトで昼景でも内観が沈まない光量に</li>
+        <li><b>レンダリング設定</b> — Cycles 128サンプル＋デノイズ、AgX トーンマップ。元サイトと同アングル＋右斜め45度の2構図をプリセット</li>
+      </ul>
+
       <div style="max-width:900px;margin:0 auto">
         <a class="back-link" href="index.html">← トップページに戻る</a>
       </div>
