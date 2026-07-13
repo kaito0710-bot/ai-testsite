@@ -17,7 +17,7 @@ const observer = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.1 });
 
-document.querySelectorAll('.card, .tool-item, .log-item').forEach(el => {
+document.querySelectorAll('.card, .tool-item, .log-item, .work-card').forEach(el => {
   el.style.opacity = '0';
   el.style.transform = 'translateY(16px)';
   el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';

@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Tech Lab - 生成AI技術検証サイト</title>
+  <meta name="description" content="Claude Code をはじめとする生成AI技術の検証サイト。Blender MCP 連携による3Dモデリング事例（実在住宅の再現・プロシージャル生成）を公開中。">
+  <meta property="og:title" content="AI Tech Lab - 生成AI技術検証サイト">
+  <meta property="og:description" content="Claude Code × Blender MCP による3Dモデリング検証事例を公開。実在モデルハウスのフォトリアル再現、間取りデータからの住宅一括生成など。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kaito0710-bot.github.io/ai-testsite/">
+  <meta property="og:image" content="https://kaito0710-bot.github.io/ai-testsite/images/biena_v2_45deg.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+  <meta name="theme-color" content="#0d0d0f">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,6 +21,7 @@
       <div class="logo">AI Tech Lab</div>
       <ul>
         <li><a href="#about">概要</a></li>
+        <li><a href="#works">検証事例</a></li>
         <li><a href="#tools">検証ツール</a></li>
         <li><a href="#log">検証ログ</a></li>
       </ul>
@@ -46,7 +56,67 @@
       </div>
     </section>
 
-    <section id="tools" class="section alt">
+    <section id="works" class="section alt">
+      <h2>検証事例</h2>
+      <div class="work-grid">
+        <a class="work-card" href="biena-modeling.html">
+          <div class="work-thumb"><img src="images/thumb_biena.jpg" alt="BIENA風モデルハウスのレンダリング" loading="lazy"></div>
+          <div class="work-body">
+            <div class="work-tags"><span class="work-tag">Blender</span><span class="work-tag">MCP</span><span class="work-tag">フォトリアル</span></div>
+            <h3>実在モデルハウスの再現 — BIENA風（外観・内観）</h3>
+            <p>URLひとつから積水ハウス「ビエナ」を再現。PBRタイル外壁・ガラス透過・内観造作・フォトスキャン植栽まで対話のみで到達。</p>
+            <span class="work-date">2026-07-06 〜 07-12 更新</span>
+          </div>
+        </a>
+        <a class="work-card" href="suumo-mansion.html">
+          <div class="work-thumb"><img src="images/thumb_suumo.jpg" alt="SUUMO掲載の実在賃貸マンションを再現したレンダリング" loading="lazy"></div>
+          <div class="work-body">
+            <div class="work-tags"><span class="work-tag">Blender</span><span class="work-tag">MCP</span><span class="work-tag">フォトリアル</span></div>
+            <h3>SUUMO掲載の実在賃貸マンション再現（外観）</h3>
+            <p>掲載写真を参考に賃貸マンションを再現。タイル外壁・実写PBR・金網フェンスや電柱などの細部、クラッシュからの自動復旧まで検証。</p>
+            <span class="work-date">2026-07-12 〜 07-13 更新</span>
+          </div>
+        </a>
+        <a class="work-card" href="procedural-house.html">
+          <div class="work-thumb"><img src="images/thumb_procedural.jpg" alt="プロシージャル生成住宅の外観" loading="lazy"></div>
+          <div class="work-body">
+            <div class="work-tags"><span class="work-tag">Blender</span><span class="work-tag">Python</span><span class="work-tag">自動生成</span></div>
+            <h3>間取りデータからの完全プロシージャル住宅生成</h3>
+            <p>間取り情報のみを入力に、躯体・建具・家具・照明を含む住宅一棟をPythonで一括生成。AIの自己検証・修正フローも確認。</p>
+            <span class="work-date">2026-07-09</span>
+          </div>
+        </a>
+        <a class="work-card" href="ldk-interior.html">
+          <div class="work-thumb"><img src="images/thumb_ldk.jpg" alt="リエゾン風LDK内観のレンダリング" loading="lazy"></div>
+          <div class="work-body">
+            <div class="work-tags"><span class="work-tag">Blender</span><span class="work-tag">内観</span></div>
+            <h3>実在内観写真を参考にしたLDKモデリング</h3>
+            <p>積水ハウス「リエゾン」の内観写真を参照し、家具・照明・マテリアルを含むLDK空間を再現。</p>
+            <span class="work-date">2026-07-06</span>
+          </div>
+        </a>
+        <a class="work-card" href="blender-house.html">
+          <div class="work-thumb"><img src="images/thumb_house.jpg" alt="モダンハウスの外観レンダリング" loading="lazy"></div>
+          <div class="work-body">
+            <div class="work-tags"><span class="work-tag">Blender</span><span class="work-tag">MCP</span></div>
+            <h3>自然言語のみでモダンハウス生成</h3>
+            <p>プロンプトだけで外観・内観・プール・乗用車まで含むモダンハウス一式を生成した初期検証。</p>
+            <span class="work-date">2026-05-06</span>
+          </div>
+        </a>
+        <a class="work-card" href="blender-slide.html">
+          <div class="work-thumb work-thumb-emoji">📊</div>
+          <div class="work-body">
+            <div class="work-tags"><span class="work-tag">スライド</span></div>
+            <h3>Blender + AI連携 解説スライド</h3>
+            <p>Blender MCP 連携の仕組みとワークフローをまとめた解説スライド。</p>
+            <span class="work-date">2026-05-06</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section id="tools" class="section">
       <h2>検証中のツール</h2>
       <div class="tool-list">
         <div class="tool-item">
@@ -62,37 +132,13 @@
           <span class="tool-status status-active">検証中</span>
         </div>
         <div class="tool-item">
-          <a class="tool-name tool-link" href="blender-slide.html" target="_blank">Blender + AI連携（解説スライド）</a>
-          <span class="tool-status status-done">完了</span>
-        </div>
-        <div class="tool-item">
-          <a class="tool-name tool-link" href="blender-house.html" target="_blank">Blender モダンハウス生成ギャラリー</a>
-          <span class="tool-status status-done">完了</span>
-        </div>
-        <div class="tool-item">
-          <a class="tool-name tool-link" href="biena-modeling.html">Blender × Claude Code — BIENA風モデリング検証（外観）</a>
-          <span class="tool-status status-done">完了</span>
-        </div>
-        <div class="tool-item">
-          <a class="tool-name tool-link" href="ldk-interior.html">Blender × Claude Code — リエゾン風LDKモデリング検証（内観）</a>
-          <span class="tool-status status-done">完了</span>
-        </div>
-        <div class="tool-item">
-          <a class="tool-name tool-link" href="procedural-house.html">Blender × Claude Code — 間取りデータからの完全プロシージャル住宅生成（外観・内観）</a>
-          <span class="tool-status status-done">完了</span>
-        </div>
-        <div class="tool-item">
-          <a class="tool-name tool-link" href="suumo-mansion.html">Blender × Claude Code — SUUMO掲載の実在賃貸マンション再現（外観・フォトリアル化）</a>
-          <span class="tool-status status-done">完了</span>
-        </div>
-        <div class="tool-item">
           <span class="tool-name">GitHub Copilot</span>
           <span class="tool-status status-pending">予定</span>
         </div>
       </div>
     </section>
 
-    <section id="log" class="section">
+    <section id="log" class="section alt">
       <h2>検証ログ</h2>
       <div class="log-list">
         <div class="log-item">
