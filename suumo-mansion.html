@@ -135,7 +135,7 @@
     <section class="case-hero">
       <span class="badge">Blender × Claude Code (MCP)</span>
       <h1>SUUMO掲載の実在賃貸マンションを外観写真から再現<br>— 第2林マンション（大阪府寝屋川市）</h1>
-      <p class="meta">検証日: 2026-07-12 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ 参照: <a href="https://suumo.jp/library/tf_27/sc_27215/to_1000848588/" target="_blank" rel="noopener" style="color:var(--primary)">SUUMO物件ライブラリー（掲載ページ）</a></p>
+      <p class="meta">検証日: 2026-07-12（<a href="#update-20260713" style="color:var(--primary)">2026-07-13 大幅アップデート</a>）／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ 参照: <a href="https://suumo.jp/library/tf_27/sc_27215/to_1000848588/" target="_blank" rel="noopener" style="color:var(--primary)">SUUMO物件ライブラリー（掲載ページ）</a></p>
     </section>
 
     <section class="section" style="padding-top:1rem">
@@ -209,7 +209,70 @@ https://suumo.jp/library/tf_27/sc_27215/to_1000848588/</pre>
       </ol>
     </section>
 
-    <section class="section">
+    <section class="section" id="update-20260713">
+      <h2>アップデート（2026-07-13）— タイル外壁・実写PBR・細部作り込み・HDRI環境</h2>
+      <p style="max-width:900px;margin:0 auto 1.5rem;font-size:0.9rem;color:var(--text-muted)">
+        初回掲載後、4回のプロンプトで段階的に品質を引き上げました。
+        途中でBlenderがクラッシュしてシーンが失われましたが、全工程がPythonスクリプト化されていたため約460オブジェクトを自動で完全再構築。
+        以後は.blendファイルの保存とヘッドレスプロセスでのレンダリングに運用を変更し、作業の安全性も改善しています。
+      </p>
+
+      <div class="prompt-box">
+        <div class="label">PROMPT 4〜7 — 段階的ブラッシュアップ</div>
+        <pre>壁の質感をタイルの質感や光の反射などを反映してもっとリアルにして
+白い壁のテクスチャがしょぼい。もっとリアルなテクスチャにして
+ガラスや干している布団、フェンス、電柱、看板など細部をもっとリアルにして
+下記サイトを参考にして、全体的にさらにリアルになるようにブラッシュアップして
+https://modelinghappy.com/archives/65959</pre>
+      </div>
+
+      <figure class="result-figure">
+        <img src="images/mansion_v2_final_wide.jpg" alt="最終ブラッシュアップ版の全景レンダリング" loading="lazy">
+        <figcaption>最終版（全景）— 実写HDRIの空と雲、太陽光とのハイブリッドライティング、背景の隣接建物、空気遠近法</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_v2_final_mid.jpg" alt="フェンス越しのミドルショット" loading="lazy">
+        <figcaption>ミドルショット — ひし形金網フェンス、縞柄の布団、左奥の隣接マンション。実際の掲載写真に写っている街の文脈を再現</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_v2_final_close.jpg" alt="タイル外壁と映り込みの近景" loading="lazy">
+        <figcaption>近景 — 二丁掛タイルの割り付けと実写PBRテクスチャ、ガラスの空の映り込み</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_v2_details.jpg" alt="細部作り込みの検証ショット" loading="lazy">
+        <figcaption>細部の作り込み — 金網の透け、垂れ下がる布団の縞柄、屋上看板のフレームと白抜きロゴ、弛んだ電線</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_v2_pbr.jpg" alt="実写PBRテクスチャ適用時の中間段階" loading="lazy">
+        <figcaption>中間段階 — Poly Havenの実写スキャン外壁テクスチャ（CC0）適用直後。ベージュが強く出たため彩度補正のイテレーションを実施</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/mansion_v2_tile.jpg" alt="プロシージャルタイル外壁の段階" loading="lazy">
+        <figcaption>中間段階 — プロシージャル生成の二丁掛タイル（95×45mm・目地4mm・馬目地）と目地の凹み</figcaption>
+      </figure>
+
+      <h3 style="max-width:900px;margin:2rem auto 1rem;font-size:1.05rem">主な更新内容</h3>
+      <ul class="feature-list">
+        <li><b>タイル外壁</b> — 二丁掛タイル（95×45mm・目地4mm）の割り付けをプロシージャルで実寸生成。目地の凹み、タイルごとの色ムラ、磁器らしい半光沢の反射</li>
+        <li><b>実写PBRテクスチャ</b> — Poly Haven「beige_wall_001」（16K実写スキャン・CC0）の拡散・法線・ラフネス・AOマップを導入し、タイル割りと合成。実写由来の微細な表面グレインを獲得</li>
+        <li><b>窓ガラス</b> — カーテンの襞の明暗、実ガラスのわずかな面歪みによる映り込みの揺れ、住戸ごとにランダムな室内の表情</li>
+        <li><b>布団・シーツ</b> — 手すり壁を跨いで垂れる3ピース構成＋縞柄＋布のよれ・シーン光沢。位置と傾きをランダム化</li>
+        <li><b>金網フェンス</b> — ±45°のひし形メッシュ（周期5cm）をアルファ抜きで再現。向こう側が透けて見える本物の金網に。上桟パイプも追加</li>
+        <li><b>電柱・電線</b> — テーパー付きコンクリート柱、腕金と碍子、柱上変圧器、カテナリー（自重で弛む）電線、建物への引込線</li>
+        <li><b>看板</b> — 金属フレーム、白抜きの三日月ロゴ、駐車場看板に「月極駐車場」「無断駐車禁止」の文字</li>
+        <li><b>HDRI環境</b> — 実写の空（晴れ時々曇り・4K）＋太陽ランプのハイブリッドライティング。実際の雲が背景と映り込みに入る</li>
+        <li><b>周辺環境</b> — 写真に写る左奥の茶色いマンション、右奥のビル、北側の低層住宅、遠景の街並み、駐車場の車3台</li>
+        <li><b>空気感とコンポジット</b> — ミストパスの空気遠近法、ブルーム、微弱なレンズ歪み・色収差（Blender 5の新コンポジターAPIで構築）</li>
+      </ul>
+
+      <h3 style="max-width:900px;margin:2rem auto 1rem;font-size:1.05rem">検証で得られた知見（トラブルと対処）</h3>
+      <ul class="feature-list">
+        <li><b>クラッシュからの完全復旧</b> — レンダリング中にBlenderが強制終了しシーン消失。全工程スクリプト化のおかげで約460オブジェクトを数分で自動再構築。以後は必ず.blend保存＋別プロセスレンダリングに変更</li>
+        <li><b>Blender 5 API対応</b> — コンポジターがノードグループ方式に変更されており（scene.node_tree廃止）、MixRGB等の旧ノードも廃止。新旧APIの差異をAIが調査しながら対応</li>
+        <li><b>露出の物理整合</b> — 物理スカイ（W/m²）とHDRI（相対輝度）で約5EVの露出差。光源を切り替えるたびにテストレンダリングで露出を再校正</li>
+        <li><b>HDRIの太陽問題</b> — 選定したHDRIは太陽が雲に隠れたタイプで直射光が出ず、4方向の回転テストで確認後、HDRIの空＋太陽ランプのハイブリッドに切り替え</li>
+      </ul>
+
       <div style="max-width:900px;margin:0 auto">
         <a class="back-link" href="index.html">← トップページに戻る</a>
       </div>
