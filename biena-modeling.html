@@ -141,7 +141,7 @@
     <section class="case-hero">
       <span class="badge">Blender × Claude Code (MCP)</span>
       <h1>実在モデルハウスを参考にした3Dモデリング検証<br>— 積水ハウス「BIENA（ビエナ）」風</h1>
-      <p class="meta">検証日: 2026-07-06（<a href="#update-20260712" style="color:var(--primary)">2026-07-12 大幅アップデート</a>）／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ <a href="ldk-interior.html" style="color:var(--primary)">内観編（リエゾン風LDK）はこちら</a></p>
+      <p class="meta">検証日: 2026-07-06（アップデート: <a href="#update-20260712" style="color:var(--primary)">07-12</a>・<a href="#update-20260714" style="color:var(--primary)">07-14</a>）／ 使用モデル: Claude Fable 5 ／ 環境: Blender + blender-mcp ／ <a href="ldk-interior.html" style="color:var(--primary)">内観編（リエゾン風LDK）はこちら</a></p>
     </section>
 
     <section class="section" style="padding-top:1rem">
@@ -247,6 +247,30 @@ https://www.jutakutenjijo.com/housemakers/sekisuihouse/biena</pre>
         <li><b>カーポートの車を再現</b> — ホイールアーチのくり抜き、ミラー・グリル・バンパー等を備えたシルバーワゴンをプリミティブから造形</li>
         <li><b>照明のHDRI化</b> — Poly Haven の晴天HDRIをパックし、太陽方向をアングルに合わせて最適化。室内はエリアライトで昼景でも内観が沈まない光量に</li>
         <li><b>レンダリング設定</b> — Cycles 128サンプル＋デノイズ、AgX トーンマップ。元サイトと同アングル＋右斜め45度の2構図をプリセット</li>
+      </ul>
+
+    </section>
+
+    <section class="section alt" id="update-20260714">
+      <h2>アップデート（2026-07-14）— 環境構築・コンポジット仕上げ</h2>
+      <p style="max-width:900px;margin:0 auto 1.5rem;font-size:0.9rem;color:var(--text-muted)">
+        建築ビジュアライゼーション講座のワークフロー（基礎モデリング → ディテール → 環境構築 → インテリア → ライティング → コンポジット）を参考に、
+        これまで手薄だった「環境の作り込み」と「レンダリングの後処理」を強化しました。
+      </p>
+
+      <figure class="result-figure">
+        <img src="images/biena_v3_45deg.jpg" alt="環境・コンポジット強化後の最終レンダリング" loading="lazy">
+        <figcaption>最新レンダリング — パーティクル芝・背景の隣家・縁石・植え込みを追加し、被写界深度とグレアで一眼写真らしい仕上げに</figcaption>
+      </figure>
+
+      <h3 style="max-width:900px;margin:2rem auto 1rem;font-size:1.05rem">主な更新内容</h3>
+      <ul class="feature-list">
+        <li><b>パーティクル芝</b> — ベタ塗りだった芝生をヘアーパーティクルの3D芝（親2,200本＋子株）に。根元→先端のグラデーションで自然な色味</li>
+        <li><b>背景の隣家8棟</b> — 空だった地平線に隣家ボリュームを配置し、住宅街の中に建つ実写らしい奥行きを演出</li>
+        <li><b>外構ディテール</b> — 道路との境界に縁石、タイル塔の足元に刈り込み低木4株を追加</li>
+        <li><b>建物ディテール</b> — 雨樋（縦樋）×2、玄関灯（発光シェード）、ステンレス表札、ドアマットを追加</li>
+        <li><b>被写界深度（DoF）</b> — f/4・フォーカス20mで手前の樹木がわずかにボケる、建築写真らしいレンズ表現</li>
+        <li><b>コンポジット</b> — Blender 5の新ノードグループ方式でFog Glowグレア＋コントラスト調整を構築し、F12出力に自動適用</li>
       </ul>
 
       <div style="max-width:900px;margin:0 auto">
