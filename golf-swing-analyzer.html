@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ゴルフスイング分析</title>
+<meta name="description" content="ブラウザだけで動くゴルフスイング分析ツール。スロー再生・コマ送り・ライン/角度計測・2画面比較に対応。動画はアップロードされず端末内で処理されます。">
+<meta property="og:title" content="ゴルフスイング分析ツール">
+<meta property="og:description" content="スロー再生・コマ送り・角度計測・2画面比較ができるブラウザアプリ">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛳</text></svg>">
+<meta name="theme-color" content="#0e1310">
+<style>
+  :root {
+    --bg: #0e1310;
+    --panel: #161d18;
+    --panel2: #1d261f;
+    --border: #2b382e;
+    --text: #e8f0ea;
+    --muted: #8fa396;
+    --accent: #34c759;
+    --accent-dim: #1f7a3a;
+    --danger: #ff5c5c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: .04em; }
+  header h1 span { color: var(--accent); }
+  .mode-switch { display: flex; gap: 4px; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .mode-switch button {
+    border: none; background: transparent; color: var(--muted);
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+  }
+  .mode-switch button.active { background: var(--accent-dim); color: #fff; }
+
+  /* ツールバー */
+  .toolbar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 10px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .tool-group { display: flex; align-items: center; gap: 4px; }
+  .tool-group .label { font-size: 11px; color: var(--muted); margin-right: 4px; }
+  .tool-btn {
+    border: 1px solid var(--border); background: var(--panel2); color: var(--text);
+    padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .tool-btn:hover { border-color: var(--accent-dim); }
+  .tool-btn.active { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
+  .color-btn {
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; padding: 0;
+  }
+  .color-btn.active { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+  select, input[type="range"] { accent-color: var(--accent); }
+  select {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 8px; font-size: 13px; cursor: pointer;
+  }
+  .width-slider { width: 80px; }
+
+  main { padding: 16px 20px 40px; }
+  .players { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 1100px; margin: 0 auto; }
+  .players.compare { grid-template-columns: 1fr 1fr; max-width: 1600px; }
+  @media (max-width: 900px) { .players.compare { grid-template-columns: 1fr; } }
+
+  .player {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; display: none;
+  }
+  .player.visible { display: block; }
+  .player-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; border-bottom: 1px solid var(--border);
+  }
+  .player-head .title { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .player-head .head-btns { display: flex; gap: 6px; }
+  .mini-btn {
+    border: 1px solid var(--border); background: var(--panel2); color: var(--text);
+    padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+  .mini-btn:hover { border-color: var(--accent-dim); }
+
+  .stage {
+    position: relative; background: #000;
+    aspect-ratio: 16 / 10; overflow: hidden;
+  }
+  .stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+
+  .dropzone {
+    position: absolute; inset: 0; z-index: 5;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    background: repeating-linear-gradient(135deg, #10160f, #10160f 14px, #121a11 14px, #121a11 28px);
+    border: 2px dashed var(--border); cursor: pointer; text-align: center; padding: 20px;
+  }
+  .dropzone.dragover { border-color: var(--accent); background: #14231a; }
+  .dropzone .icon { font-size: 40px; }
+  .dropzone .main-text { font-size: 15px; font-weight: 700; }
+  .dropzone .sub-text { font-size: 12px; color: var(--muted); }
+  .dropzone.hidden { display: none; }
+
+  .controls { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .scrub-row { display: flex; align-items: center; gap: 10px; }
+  .scrub-row input[type="range"] { flex: 1; }
+  .time-display { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 110px; text-align: right; }
+  .ctrl-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ctrl-btn {
+    border: 1px solid var(--border); background: var(--panel2); color: var(--text);
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;
+  }
+  .ctrl-btn:hover { border-color: var(--accent-dim); }
+  .ctrl-btn.play { background: var(--accent-dim); border-color: var(--accent); min-width: 84px; }
+  .checkpoints { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .chip button { border: none; cursor: pointer; font-size: 12px; padding: 6px 8px; }
+  .chip .jump { background: var(--panel2); color: var(--muted); min-width: 88px; }
+  .chip .jump.set { color: var(--text); font-weight: 600; }
+  .chip .mark { background: var(--accent-dim); color: #fff; border-left: 1px solid var(--border); }
+  .chip .mark:hover { background: var(--accent); }
+
+  .compare-bar {
+    display: none; justify-content: center; gap: 10px; margin: 0 auto 14px; max-width: 1600px;
+  }
+  .compare-bar.visible { display: flex; }
+
+  .hint {
+    max-width: 1100px; margin: 14px auto 0; font-size: 12px; color: var(--muted);
+    line-height: 1.8; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .hint b { color: var(--text); }
+  .back-link { font-size: 12px; color: var(--muted); text-decoration: none; margin-left: auto; }
+  .back-link:hover { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    header { padding: 10px 12px; gap: 10px; }
+    header h1 { font-size: 16px; }
+    .toolbar { padding: 8px 10px; gap: 8px; }
+    .tool-btn { padding: 6px 9px; font-size: 12px; }
+    .tool-group .label { display: none; }
+    .width-slider { width: 60px; }
+    main { padding: 10px 8px 30px; }
+    .controls { padding: 8px 10px 12px; }
+    .ctrl-btn { padding: 8px 10px; font-size: 13px; }
+    .ctrl-btn.play { min-width: 72px; }
+    .scrub-row { flex-wrap: wrap; }
+    .time-display { min-width: auto; }
+    .chip .jump { min-width: 76px; font-size: 11px; }
+    .hint { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⛳ ゴルフスイング<span>分析</span></h1>
+  <div class="mode-switch">
+    <button id="modeSingle" class="active">シングル</button>
+    <button id="modeCompare">2画面比較</button>
+  </div>
+  <a class="back-link" href="./index.html">← AI Tech Lab</a>
+</header>
+
+<div class="toolbar">
+  <div class="tool-group">
+    <span class="label">ツール</span>
+    <button class="tool-btn active" data-tool="none">👆 操作</button>
+    <button class="tool-btn" data-tool="line">📏 ライン</button>
+    <button class="tool-btn" data-tool="angle">📐 角度</button>
+    <button class="tool-btn" data-tool="circle">⭕ 円</button>
+    <button class="tool-btn" data-tool="free">✏️ フリー</button>
+  </div>
+  <div class="tool-group">
+    <span class="label">色</span>
+    <button class="color-btn active" data-color="#ff4d4d" style="background:#ff4d4d"></button>
+    <button class="color-btn" data-color="#ffd60a" style="background:#ffd60a"></button>
+    <button class="color-btn" data-color="#34c759" style="background:#34c759"></button>
+    <button class="color-btn" data-color="#4da6ff" style="background:#4da6ff"></button>
+    <button class="color-btn" data-color="#ffffff" style="background:#ffffff"></button>
+  </div>
+  <div class="tool-group">
+    <span class="label">太さ</span>
+    <input type="range" class="width-slider" id="lineWidth" min="1" max="8" value="3">
+  </div>
+  <div class="tool-group">
+    <span class="label">コマ送りfps</span>
+    <select id="fpsSelect">
+      <option value="24">24</option>
+      <option value="30" selected>30</option>
+      <option value="60">60</option>
+      <option value="120">120</option>
+    </select>
+  </div>
+</div>
+
+<main>
+  <div class="compare-bar" id="compareBar">
+    <button class="ctrl-btn play" id="syncPlay">▶ 同時再生</button>
+    <button class="ctrl-btn" id="syncPause">⏸ 同時停止</button>
+  </div>
+  <div class="players" id="players"></div>
+
+  <div class="hint">
+    <b>使い方：</b>動画を読み込んだら、スロー再生やコマ送り（◀ / ▶、キーボードの ← / →、Space で再生/停止）でスイングを確認。
+    <b>📏 ライン</b>はドラッグで引くと水平からの角度を自動表示（シャフトプレーンや前傾角のチェックに）。
+    <b>📐 角度</b>は3点クリックで任意の角度を計測。<b>アドレス / トップ / インパクト / フィニッシュ</b>の「●」で現在位置を登録し、ワンタップでジャンプできます。
+    描画は「↩ 戻す」「🗑 全消去」、縦横の基準線は「＋縦線 / ＋横線」で追加できます。
+  </div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---- グローバル状態（ツールバー） ----
+  const state = {
+    tool: 'none',
+    color: '#ff4d4d',
+    lineWidth: 3,
+    fps: 30,
+  };
+
+  document.querySelectorAll('.tool-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.tool = btn.dataset.tool;
+      players.forEach(p => p.setCursor());
+    });
+  });
+  document.querySelectorAll('.color-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.color = btn.dataset.color;
+    });
+  });
+  document.getElementById('lineWidth').addEventListener('input', e => {
+    state.lineWidth = Number(e.target.value);
+  });
+  document.getElementById('fpsSelect').addEventListener('change', e => {
+    state.fps = Number(e.target.value);
+  });
+
+  // ---- ユーティリティ ----
+  function fmtTime(t) {
+    if (!isFinite(t)) t = 0;
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    const cs = Math.floor((t % 1) * 100);
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+  }
+
+  const CHECKPOINTS = ['アドレス', 'トップ', 'インパクト', 'フィニッシュ'];
+
+  // ---- プレイヤー ----
+  class Player {
+    constructor(root, title) {
+      this.shapes = [];
+      this.draft = null;        // ドラッグ中の図形
+      this.anglePts = [];       // 角度ツールのクリック点
+      this.checkpoints = {};    // name -> time
+      this.buildDOM(root, title);
+      this.bindVideo();
+      this.bindCanvas();
+      this.bindControls();
+      this.resizeObserver = new ResizeObserver(() => this.resizeCanvas());
+      this.resizeObserver.observe(this.stage);
+    }
+
+    buildDOM(root, title) {
+      root.classList.add('player');
+      root.innerHTML = `
+        <div class="player-head">
+          <span class="title">${title}</span>
+          <div class="head-btns">
+            <button class="mini-btn" data-act="vguide">＋縦線</button>
+            <button class="mini-btn" data-act="hguide">＋横線</button>
+            <button class="mini-btn" data-act="undo">↩ 戻す</button>
+            <button class="mini-btn" data-act="clear">🗑 全消去</button>
+          </div>
+        </div>
+        <div class="stage">
+          <video playsinline muted preload="metadata"></video>
+          <canvas></canvas>
+          <div class="dropzone">
+            <div class="icon">🎥</div>
+            <div class="main-text">スイング動画をここにドロップ</div>
+            <div class="sub-text">またはクリックしてファイルを選択（mp4 / mov / webm）</div>
+            <input type="file" accept="video/*" hidden>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="scrub-row">
+            <input type="range" class="scrub" min="0" max="1000" value="0" step="1">
+            <span class="time-display">00:00.00 / 00:00.00</span>
+          </div>
+          <div class="ctrl-row">
+            <button class="ctrl-btn play" data-act="play">▶ 再生</button>
+            <button class="ctrl-btn" data-act="back">◀ 1コマ</button>
+            <button class="ctrl-btn" data-act="fwd">1コマ ▶</button>
+            <select class="speed">
+              <option value="0.1">0.1x</option>
+              <option value="0.25">0.25x</option>
+              <option value="0.5">0.5x</option>
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x</option>
+            </select>
+            <button class="ctrl-btn" data-act="change">📂 動画変更</button>
+          </div>
+          <div class="checkpoints"></div>
+        </div>`;
+
+      this.root = root;
+      this.stage = root.querySelector('.stage');
+      this.video = root.querySelector('video');
+      this.canvas = root.querySelector('canvas');
+      this.ctx = this.canvas.getContext('2d');
+      this.dropzone = root.querySelector('.dropzone');
+      this.fileInput = root.querySelector('input[type=file]');
+      this.scrub = root.querySelector('.scrub');
+      this.timeDisplay = root.querySelector('.time-display');
+      this.playBtn = root.querySelector('[data-act=play]');
+      this.speedSelect = root.querySelector('.speed');
+
+      // チェックポイントUI
+      const cpWrap = root.querySelector('.checkpoints');
+      this.cpButtons = {};
+      CHECKPOINTS.forEach(name => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        const jump = document.createElement('button');
+        jump.className = 'jump';
+        jump.textContent = `${name} --:--`;
+        jump.addEventListener('click', () => {
+          if (name in this.checkpoints) this.seek(this.checkpoints[name]);
+        });
+        const mark = document.createElement('button');
+        mark.className = 'mark';
+        mark.textContent = '●';
+        mark.title = '現在位置を登録';
+        mark.addEventListener('click', () => {
+          this.checkpoints[name] = this.video.currentTime;
+          jump.textContent = `${name} ${fmtTime(this.video.currentTime).slice(0, 8)}`;
+          jump.classList.add('set');
+        });
+        chip.append(jump, mark);
+        cpWrap.appendChild(chip);
+        this.cpButtons[name] = jump;
+      });
+    }
+
+    // ---- 動画の読み込み ----
+    bindVideo() {
+      this.dropzone.addEventListener('click', () => this.fileInput.click());
+      this.fileInput.addEventListener('change', () => {
+        if (this.fileInput.files[0]) this.loadFile(this.fileInput.files[0]);
+      });
+      ['dragover', 'dragleave', 'drop'].forEach(ev => {
+        this.stage.addEventListener(ev, e => {
+          e.preventDefault();
+          this.dropzone.classList.toggle('dragover', ev === 'dragover');
+          if (ev === 'drop') {
+            const f = e.dataTransfer.files[0];
+            if (f && f.type.startsWith('video/')) this.loadFile(f);
+          }
+        });
+      });
+
+      this.video.addEventListener('loadedmetadata', () => {
+        this.dropzone.classList.add('hidden');
+        // 動画のアスペクト比にステージを合わせる
+        if (this.video.videoWidth && this.video.videoHeight) {
+          this.stage.style.aspectRatio = `${this.video.videoWidth} / ${this.video.videoHeight}`;
+        }
+        this.updateTime();
+        this.resizeCanvas();
+      });
+      this.video.addEventListener('play', () => {
+        this.playBtn.textContent = '⏸ 停止';
+        this.rafLoop();
+      });
+      this.video.addEventListener('pause', () => {
+        this.playBtn.textContent = '▶ 再生';
+        this.updateTime();
+      });
+      this.video.addEventListener('timeupdate', () => this.updateTime());
+      this.video.addEventListener('ended', () => { this.playBtn.textContent = '▶ 再生'; });
+    }
+
+    loadFile(file) {
+      if (this.objectURL) URL.revokeObjectURL(this.objectURL);
+      this.objectURL = URL.createObjectURL(file);
+      this.loadURL(this.objectURL);
+    }
+
+    loadURL(url) {
+      this.video.src = url;
+      this.video.load();
+      this.shapes = [];
+      this.anglePts = [];
+      this.checkpoints = {};
+      CHECKPOINTS.forEach(name => {
+        this.cpButtons[name].textContent = `${name} --:--`;
+        this.cpButtons[name].classList.remove('set');
+      });
+      this.redraw();
+    }
+
+    hasVideo() { return !!this.video.src && this.video.readyState >= 1; }
+
+    // ---- 再生コントロール ----
+    bindControls() {
+      this.root.querySelectorAll('[data-act]').forEach(btn => {
+        btn.addEventListener('click', () => this.action(btn.dataset.act));
+      });
+      this.speedSelect.addEventListener('change', () => {
+        this.video.playbackRate = Number(this.speedSelect.value);
+      });
+      this.scrub.addEventListener('input', () => {
+        if (!this.hasVideo()) return;
+        this.video.currentTime = (this.scrub.value / 1000) * this.video.duration;
+      });
+      // クリックでアクティブプレイヤーに（キーボード操作の対象）
+      this.root.addEventListener('pointerdown', () => { activePlayer = this; });
+    }
+
+    action(act) {
+      switch (act) {
+        case 'play': this.togglePlay(); break;
+        case 'back': this.step(-1); break;
+        case 'fwd': this.step(1); break;
+        case 'change': this.fileInput.click(); break;
+        case 'undo':
+          this.shapes.pop();
+          this.anglePts = [];
+          this.redraw();
+          break;
+        case 'clear':
+          this.shapes = [];
+          this.anglePts = [];
+          this.redraw();
+          break;
+        case 'vguide':
+          this.shapes.push({ type: 'line', color: state.color, width: state.lineWidth,
+            p1: { x: 0.5, y: 0.03 }, p2: { x: 0.5, y: 0.97 }, guide: true });
+          this.redraw();
+          break;
+        case 'hguide':
+          this.shapes.push({ type: 'line', color: state.color, width: state.lineWidth,
+            p1: { x: 0.03, y: 0.5 }, p2: { x: 0.97, y: 0.5 }, guide: true });
+          this.redraw();
+          break;
+      }
+    }
+
+    togglePlay() {
+      if (!this.hasVideo()) return;
+      if (this.video.paused) {
+        this.video.playbackRate = Number(this.speedSelect.value);
+        this.video.play();
+      } else {
+        this.video.pause();
+      }
+    }
+
+    step(dir) {
+      if (!this.hasVideo()) return;
+      this.video.pause();
+      const t = this.video.currentTime + dir / state.fps;
+      this.seek(t);
+    }
+
+    seek(t) {
+      if (!this.hasVideo()) return;
+      this.video.currentTime = Math.max(0, Math.min(this.video.duration || 0, t));
+      this.updateTime();
+    }
+
+    updateTime() {
+      const cur = this.video.currentTime || 0;
+      const dur = this.video.duration || 0;
+      this.timeDisplay.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+      if (dur > 0 && document.activeElement !== this.scrub) {
+        this.scrub.value = Math.round((cur / dur) * 1000);
+      }
+    }
+
+    rafLoop() {
+      if (this.video.paused || this.video.ended) return;
+      this.updateTime();
+      requestAnimationFrame(() => this.rafLoop());
+    }
+
+    // ---- 描画（キャンバス） ----
+    bindCanvas() {
+      const cv = this.canvas;
+      cv.addEventListener('pointerdown', e => this.onPointerDown(e));
+      cv.addEventListener('pointermove', e => this.onPointerMove(e));
+      cv.addEventListener('pointerup', e => this.onPointerUp(e));
+      cv.addEventListener('pointercancel', () => { this.draft = null; this.redraw(); });
+    }
+
+    setCursor() {
+      this.canvas.style.cursor = state.tool === 'none' ? 'default' : 'crosshair';
+    }
+
+    normPoint(e) {
+      const r = this.canvas.getBoundingClientRect();
+      return {
+        x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+        y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)),
+      };
+    }
+
+    onPointerDown(e) {
+      if (state.tool === 'none') return;
+      e.preventDefault();
+      this.canvas.setPointerCapture(e.pointerId);
+      const p = this.normPoint(e);
+
+      if (state.tool === 'angle') {
+        this.anglePts.push(p);
+        if (this.anglePts.length === 3) {
+          this.shapes.push({ type: 'angle', color: state.color, width: state.lineWidth, pts: this.anglePts });
+          this.anglePts = [];
+        }
+        this.redraw();
+        return;
+      }
+      if (state.tool === 'line') {
+        this.draft = { type: 'line', color: state.color, width: state.lineWidth, p1: p, p2: p };
+      } else if (state.tool === 'circle') {
+        this.draft = { type: 'circle', color: state.color, width: state.lineWidth, c: p, r: 0 };
+      } else if (state.tool === 'free') {
+        this.draft = { type: 'free', color: state.color, width: state.lineWidth, pts: [p] };
+      }
+      this.redraw();
+    }
+
+    onPointerMove(e) {
+      if (!this.draft) return;
+      const p = this.normPoint(e);
+      if (this.draft.type === 'line') this.draft.p2 = p;
+      else if (this.draft.type === 'circle') {
+        const dx = (p.x - this.draft.c.x) * this.canvas.clientWidth;
+        const dy = (p.y - this.draft.c.y) * this.canvas.clientHeight;
+        this.draft.r = Math.hypot(dx, dy) / this.canvas.clientWidth; // 幅基準で正規化
+      } else if (this.draft.type === 'free') this.draft.pts.push(p);
+      this.redraw();
+    }
+
+    onPointerUp() {
+      if (!this.draft) return;
+      const d = this.draft;
+      this.draft = null;
+      const w = this.canvas.clientWidth, h = this.canvas.clientHeight;
+      // 小さすぎる図形は破棄
+      if (d.type === 'line' && Math.hypot((d.p2.x - d.p1.x) * w, (d.p2.y - d.p1.y) * h) < 8) { this.redraw(); return; }
+      if (d.type === 'circle' && d.r * w < 5) { this.redraw(); return; }
+      if (d.type === 'free' && d.pts.length < 3) { this.redraw(); return; }
+      this.shapes.push(d);
+      this.redraw();
+    }
+
+    resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = this.stage.clientWidth, h = this.stage.clientHeight;
+      this.canvas.width = Math.round(w * dpr);
+      this.canvas.height = Math.round(h * dpr);
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      this.redraw();
+    }
+
+    px(p) {
+      return { x: p.x * this.canvas.clientWidth, y: p.y * this.canvas.clientHeight };
+    }
+
+    redraw() {
+      const ctx = this.ctx;
+      const w = this.canvas.clientWidth, h = this.canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      const all = this.draft ? [...this.shapes, this.draft] : this.shapes;
+      for (const s of all) this.drawShape(s);
+      // 角度ツールの途中クリック点
+      for (const p of this.anglePts) this.drawDot(this.px(p), state.color);
+    }
+
+    drawShape(s) {
+      const ctx = this.ctx;
+      ctx.strokeStyle = s.color;
+      ctx.fillStyle = s.color;
+      ctx.lineWidth = s.width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (s.type === 'line') {
+        const a = this.px(s.p1), b = this.px(s.p2);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        this.drawDot(a, s.color); this.drawDot(b, s.color);
+        if (!s.guide) {
+          let deg = Math.atan2(-(b.y - a.y), b.x - a.x) * 180 / Math.PI;
+          if (deg < 0) deg += 180;
+          if (deg > 180) deg -= 180;
+          this.drawLabel(`${deg.toFixed(1)}°`, (a.x + b.x) / 2 + 10, (a.y + b.y) / 2 - 10, s.color);
+        }
+      } else if (s.type === 'circle') {
+        const c = this.px(s.c);
+        const r = s.r * this.canvas.clientWidth;
+        ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, Math.PI * 2); ctx.stroke();
+      } else if (s.type === 'free') {
+        ctx.beginPath();
+        s.pts.forEach((p, i) => {
+          const q = this.px(p);
+          i === 0 ? ctx.moveTo(q.x, q.y) : ctx.lineTo(q.x, q.y);
+        });
+        ctx.stroke();
+      } else if (s.type === 'angle') {
+        const [p1, v, p3] = s.pts.map(p => this.px(p));
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y); ctx.lineTo(v.x, v.y); ctx.lineTo(p3.x, p3.y);
+        ctx.stroke();
+        this.drawDot(p1, s.color); this.drawDot(v, s.color); this.drawDot(p3, s.color);
+        // 角度計算
+        const a1 = Math.atan2(p1.y - v.y, p1.x - v.x);
+        const a2 = Math.atan2(p3.y - v.y, p3.x - v.x);
+        let diff = Math.abs(a1 - a2);
+        if (diff > Math.PI) diff = 2 * Math.PI - diff;
+        const deg = diff * 180 / Math.PI;
+        // 円弧
+        const r = 24;
+        let start = a1, end = a2;
+        let sweep = end - start;
+        if (sweep > Math.PI) { start = a2; end = a1; sweep = end - start; }
+        else if (sweep < -Math.PI) { sweep += 2 * Math.PI; end = start + sweep; }
+        else if (sweep < 0) { [start, end] = [end, start]; }
+        ctx.beginPath(); ctx.arc(v.x, v.y, r, start, end); ctx.stroke();
+        this.drawLabel(`${deg.toFixed(1)}°`, v.x + 14, v.y - 14, s.color);
+      }
+    }
+
+    drawDot(p, color) {
+      const ctx = this.ctx;
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    drawLabel(text, x, y, color) {
+      const ctx = this.ctx;
+      ctx.save();
+      ctx.font = 'bold 14px system-ui, sans-serif';
+      const w = ctx.measureText(text).width;
+      // はみ出し防止
+      x = Math.min(x, this.canvas.clientWidth - w - 14);
+      y = Math.max(y, 22);
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.beginPath();
+      ctx.roundRect(x - 6, y - 16, w + 12, 22, 6);
+      ctx.fill();
+      ctx.fillStyle = color;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+  }
+
+  // ---- プレイヤー生成 ----
+  const playersWrap = document.getElementById('players');
+  const players = [];
+  ['動画 A', '動画 B'].forEach(title => {
+    const el = document.createElement('div');
+    playersWrap.appendChild(el);
+    players.push(new Player(el, title));
+  });
+  players[0].root.classList.add('visible');
+  let activePlayer = players[0];
+
+  // ---- モード切替 ----
+  const modeSingle = document.getElementById('modeSingle');
+  const modeCompare = document.getElementById('modeCompare');
+  const compareBar = document.getElementById('compareBar');
+
+  function setMode(compare) {
+    modeSingle.classList.toggle('active', !compare);
+    modeCompare.classList.toggle('active', compare);
+    playersWrap.classList.toggle('compare', compare);
+    players[1].root.classList.toggle('visible', compare);
+    compareBar.classList.toggle('visible', compare);
+    if (!compare) players[1].video.pause();
+    players.forEach(p => p.resizeCanvas());
+  }
+  modeSingle.addEventListener('click', () => setMode(false));
+  modeCompare.addEventListener('click', () => setMode(true));
+
+  document.getElementById('syncPlay').addEventListener('click', () => {
+    players.forEach(p => {
+      if (p.hasVideo()) {
+        p.video.playbackRate = Number(p.speedSelect.value);
+        p.video.play();
+      }
+    });
+  });
+  document.getElementById('syncPause').addEventListener('click', () => {
+    players.forEach(p => p.video.pause());
+  });
+
+  // ---- キーボードショートカット ----
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, select, textarea')) return;
+    if (e.key === ' ') { e.preventDefault(); activePlayer.togglePlay(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); activePlayer.step(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); activePlayer.step(1); }
+  });
+})();
+</script>
+</body>
+</html>
