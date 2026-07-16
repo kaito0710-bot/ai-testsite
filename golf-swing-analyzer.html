@@ -167,6 +167,71 @@
   .back-link { font-size: 12px; color: var(--muted); text-decoration: none; margin-left: auto; }
   .back-link:hover { color: var(--accent); }
 
+  /* レッスンノート（ホワイトボード） */
+  .lesson-panel {
+    max-width: 1100px; margin: 0 auto 16px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  }
+  .players.compare ~ * .lesson-panel { max-width: 1600px; }
+  .lesson-panel summary {
+    padding: 12px 16px; cursor: pointer; font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px; list-style: none; user-select: none;
+  }
+  .lesson-panel summary::-webkit-details-marker { display: none; }
+  .lesson-panel summary .lesson-sub { font-size: 11px; font-weight: 400; color: var(--muted); }
+  .lesson-panel summary::after { content: '▸'; margin-left: auto; color: var(--muted); transition: transform .15s; }
+  .lesson-panel[open] summary::after { transform: rotate(90deg); }
+  .lesson-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .lesson-photos { display: flex; gap: 10px; flex-wrap: wrap; }
+  .lesson-thumb {
+    position: relative; width: 130px; height: 96px; border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border); cursor: zoom-in; background: #000;
+  }
+  .lesson-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lesson-thumb .del {
+    position: absolute; top: 4px; right: 4px; width: 22px; height: 22px;
+    border: none; border-radius: 50%; background: rgba(0,0,0,.7); color: #fff;
+    cursor: pointer; font-size: 12px; line-height: 1;
+  }
+  .lesson-add {
+    width: 130px; height: 96px; border: 2px dashed var(--border); border-radius: 10px;
+    background: var(--panel2); color: var(--muted); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-size: 12px;
+  }
+  .lesson-add:hover { border-color: var(--accent-dim); color: var(--text); }
+  .lesson-add .plus { font-size: 22px; }
+  .lesson-themes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .theme-chip {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px;
+    background: var(--panel2); color: var(--muted); user-select: none;
+  }
+  .theme-chip input { display: none; }
+  .theme-chip.checked { background: #4a3a12; border-color: #b8860b; color: #ffd60a; }
+  .lesson-memo {
+    width: 100%; min-height: 60px; resize: vertical;
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; font-size: 13px; font-family: inherit; line-height: 1.6;
+  }
+  .lesson-memo::placeholder { color: var(--muted); }
+  .lesson-note-label { font-size: 11px; color: var(--muted); }
+  .lesson-badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    background: #4a3a12; color: #ffd60a; border: 1px solid #b8860b;
+    border-radius: 10px; padding: 1px 8px; margin-left: 6px; vertical-align: middle;
+  }
+  .report .lesson-check li { margin: 3px 0; }
+
+  /* 写真の拡大表示 */
+  .lightbox {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,.9); align-items: center; justify-content: center; cursor: zoom-out;
+  }
+  .lightbox.visible { display: flex; }
+  .lightbox img { max-width: 96vw; max-height: 92vh; object-fit: contain; border-radius: 6px; }
+  .lightbox .close-hint { position: absolute; top: 12px; right: 18px; color: #fff; font-size: 13px; opacity: .7; }
+
   @media (max-width: 640px) {
     header { padding: 10px 12px; gap: 10px; }
     header h1 { font-size: 16px; }
@@ -229,14 +294,35 @@
 </div>
 
 <main>
+  <details class="lesson-panel" id="lessonPanel">
+    <summary>📋 レッスンノート<span class="lesson-sub">ホワイトボードの写真とコーチの指摘を登録すると、AI分析がそのテーマを重点チェックします</span></summary>
+    <div class="lesson-body">
+      <div>
+        <div class="lesson-note-label">ホワイトボード・メモの写真（タップで拡大）</div>
+        <div class="lesson-photos" id="lessonPhotos">
+          <button class="lesson-add" id="lessonAdd"><span class="plus">＋</span>写真を追加</button>
+        </div>
+        <input type="file" id="lessonFile" accept="image/*" multiple hidden>
+      </div>
+      <div>
+        <div class="lesson-note-label">レッスンで指摘されたテーマ（選ぶとAI分析レポートに「レッスン指摘」として反映）</div>
+        <div class="lesson-themes" id="lessonThemes"></div>
+      </div>
+      <textarea class="lesson-memo" id="lessonMemo" placeholder="コーチのアドバイスをメモ（例：切り返しを急がない。トップで間を作る。左の壁を意識）"></textarea>
+    </div>
+  </details>
+
   <div class="compare-bar" id="compareBar">
     <button class="ctrl-btn play" id="syncPlay">▶ 同時再生</button>
     <button class="ctrl-btn" id="syncPause">⏸ 同時停止</button>
   </div>
   <div class="players" id="players"></div>
 
+  <div class="lightbox" id="lightbox"><span class="close-hint">タップで閉じる ✕</span><img alt="レッスンノート写真"></div>
+
   <div class="hint">
-    <b>使い方：</b>動画を読み込んだら <b>🤖 AI分析</b>ボタンで自動フィードバック。骨格を検出してテンポ・頭のブレ・前傾キープ・スウェー・上下動・フィニッシュバランスを評価し、良い点と改善ドリルを提案します（解析はすべて端末内、動画はアップロードされません）。
+    <b>使い方：</b><b>📋 レッスンノート</b>にホワイトボードの写真や指摘テーマを登録しておくと、AI分析がそのテーマを重点チェックして「クリアできたか」を判定します（写真とメモは端末内に保存され、次回も残ります）。
+    動画を読み込んだら <b>🤖 AI分析</b>ボタンで自動フィードバック。骨格を検出してテンポ・頭のブレ・前傾キープ・スウェー・上下動・フィニッシュバランスを評価し、良い点と改善ドリルを提案します（解析はすべて端末内、動画はアップロードされません）。
     スロー再生やコマ送り（◀ / ▶、キーボードの ← / →、Space で再生/停止）でスイングを確認。
     <b>📏 ライン</b>はドラッグで引くと水平からの角度を自動表示（シャフトプレーンや前傾角のチェックに）。
     <b>📐 角度</b>は3点クリックで任意の角度を計測。<b>アドレス / トップ / インパクト / フィニッシュ</b>の「●」で現在位置を登録し、ワンタップでジャンプできます。
@@ -288,6 +374,138 @@
   }
 
   const CHECKPOINTS = ['アドレス', 'トップ', 'インパクト', 'フィニッシュ'];
+
+  // ---- レッスンノート（ホワイトボード写真＋指摘テーマ） ----
+  const LESSON_THEMES = [
+    { key: 'tempo',  label: 'テンポ・切り返し' },
+    { key: 'head',   label: '頭・軸のブレ' },
+    { key: 'spine',  label: '前傾キープ・起き上がり' },
+    { key: 'sway',   label: '腰のスウェー' },
+    { key: 'lift',   label: '伸び上がり・上下動' },
+    { key: 'finish', label: 'フィニッシュバランス' },
+  ];
+  const lesson = { photos: [], themes: [], memo: '' };
+
+  function saveLesson() {
+    try {
+      localStorage.setItem('golfLessonNotes', JSON.stringify(lesson));
+    } catch (e) {
+      // 容量オーバー時は写真なしで保存を試みる
+      try {
+        localStorage.setItem('golfLessonNotes', JSON.stringify({ ...lesson, photos: [] }));
+      } catch (e2) { /* 保存不可でもアプリは動作継続 */ }
+    }
+  }
+  function loadLesson() {
+    try {
+      const v = JSON.parse(localStorage.getItem('golfLessonNotes'));
+      if (v) {
+        lesson.photos = Array.isArray(v.photos) ? v.photos : [];
+        lesson.themes = Array.isArray(v.themes) ? v.themes : [];
+        lesson.memo = typeof v.memo === 'string' ? v.memo : '';
+      }
+    } catch (e) { /* 破損データは無視 */ }
+  }
+
+  // 写真を縮小してdataURL化（localStorageに収まるサイズに）
+  function compressImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSide = 1280;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(img.src);
+        resolve(c.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  const lessonPhotosEl = document.getElementById('lessonPhotos');
+  const lessonAddBtn = document.getElementById('lessonAdd');
+  const lessonFileInput = document.getElementById('lessonFile');
+  const lessonThemesEl = document.getElementById('lessonThemes');
+  const lessonMemoEl = document.getElementById('lessonMemo');
+  const lightbox = document.getElementById('lightbox');
+
+  function renderLessonPhotos() {
+    lessonPhotosEl.querySelectorAll('.lesson-thumb').forEach(el => el.remove());
+    lesson.photos.forEach((src, idx) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'lesson-thumb';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = `レッスン写真${idx + 1}`;
+      thumb.appendChild(img);
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.textContent = '✕';
+      del.title = '削除';
+      del.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!confirm('この写真を削除しますか？')) return;
+        lesson.photos.splice(idx, 1);
+        saveLesson();
+        renderLessonPhotos();
+      });
+      thumb.appendChild(del);
+      thumb.addEventListener('click', () => {
+        lightbox.querySelector('img').src = src;
+        lightbox.classList.add('visible');
+      });
+      lessonPhotosEl.insertBefore(thumb, lessonAddBtn);
+    });
+  }
+
+  function renderLessonThemes() {
+    lessonThemesEl.innerHTML = '';
+    for (const th of LESSON_THEMES) {
+      const label = document.createElement('label');
+      label.className = 'theme-chip' + (lesson.themes.includes(th.key) ? ' checked' : '');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = lesson.themes.includes(th.key);
+      cb.addEventListener('change', () => {
+        if (cb.checked) { if (!lesson.themes.includes(th.key)) lesson.themes.push(th.key); }
+        else lesson.themes = lesson.themes.filter(k => k !== th.key);
+        label.classList.toggle('checked', cb.checked);
+        saveLesson();
+      });
+      label.append(cb, th.label);
+      lessonThemesEl.appendChild(label);
+    }
+  }
+
+  lessonAddBtn.addEventListener('click', () => lessonFileInput.click());
+  lessonFileInput.addEventListener('change', async () => {
+    for (const f of lessonFileInput.files) {
+      if (!f.type.startsWith('image/')) continue;
+      try {
+        lesson.photos.push(await compressImage(f));
+      } catch (e) { console.error('画像の読み込みに失敗', e); }
+    }
+    lessonFileInput.value = '';
+    saveLesson();
+    renderLessonPhotos();
+  });
+  lessonMemoEl.addEventListener('input', () => {
+    lesson.memo = lessonMemoEl.value;
+    saveLesson();
+  });
+  lightbox.addEventListener('click', () => lightbox.classList.remove('visible'));
+
+  loadLesson();
+  renderLessonPhotos();
+  renderLessonThemes();
+  lessonMemoEl.value = lesson.memo;
+  if (lesson.photos.length || lesson.themes.length || lesson.memo) {
+    document.getElementById('lessonPanel').open = true;
+  }
 
   // ---- プレイヤー ----
   class Player {
@@ -811,13 +1029,36 @@
         if (ph[k] != null) html += `<span>${names[k]} ${fmtTime(ph[k]).slice(0, 8)}</span>`;
       }
       html += `</div>`;
+
+      // レッスンで指摘されたテーマの判定サマリー
+      const badge = key => lesson.themes.includes(key) ? `<span class="lesson-badge">📋 レッスン指摘</span>` : '';
+      if (lesson.themes.length) {
+        html += `<h4>📋 レッスンテーマのチェック結果</h4><ul class="lesson-check">`;
+        for (const key of lesson.themes) {
+          const th = LESSON_THEMES.find(t => t.key === key);
+          if (report.good.some(o => o.key === key)) {
+            html += `<li>${th.label} → <b style="color:var(--accent)">⭕ クリアできています！</b></li>`;
+          } else if (report.improve.some(o => o.key === key)) {
+            html += `<li>${th.label} → <b style="color:#ffb020">🔺 まだ課題あり</b>（下の改善ポイント参照）</li>`;
+          } else {
+            html += `<li>${th.label} → 今回の動画では評価できませんでした</li>`;
+          }
+        }
+        html += `</ul>`;
+        if (lesson.memo.trim()) {
+          html += `<div style="font-size:12px;color:var(--muted);margin:2px 0 4px;">💬 コーチのメモ：「${lesson.memo.trim().replace(/</g, '&lt;').slice(0, 200)}」</div>`;
+        }
+      }
+
+      // レッスン指摘のある項目を先頭に並べ替え
+      const byLesson = (a, b) => lesson.themes.includes(b.key) - lesson.themes.includes(a.key);
       if (report.good.length) {
         html += `<h4 class="good">⭕ 良いところ</h4><ul>` +
-          report.good.map(s => `<li>${s}</li>`).join('') + `</ul>`;
+          [...report.good].sort(byLesson).map(o => `<li>${o.html}${badge(o.key)}</li>`).join('') + `</ul>`;
       }
       if (report.improve.length) {
         html += `<h4 class="bad">🔺 改善ポイント</h4><ul>` +
-          report.improve.map(s => `<li>${s}</li>`).join('') + `</ul>`;
+          [...report.improve].sort(byLesson).map(o => `<li>${o.html}${badge(o.key)}</li>`).join('') + `</ul>`;
       }
       if (!report.good.length && !report.improve.length) {
         html += `<p>評価できる項目が不足しています。全身が映る角度で撮影した動画をお試しください。</p>`;
@@ -949,11 +1190,11 @@
     if (back > 0.15 && down > 0.05) {
       const tempo = back / down;
       if (tempo >= 2.2 && tempo <= 4.0) {
-        good.push(`<b>テンポが良い</b>：バックスイングとダウンスイングの比率が ${fix1(tempo)}:1。プロの平均（約3:1）に近い理想的なリズムです。`);
+        good.push({ key: 'tempo', html: `<b>テンポが良い</b>：バックスイングとダウンスイングの比率が ${fix1(tempo)}:1。プロの平均（約3:1）に近い理想的なリズムです。` });
       } else if (tempo < 2.2) {
-        improve.push(`<b>切り返しが早い</b>（${fix1(tempo)}:1、理想は約3:1）。トップで「一拍おく」意識や、「イチ、ニノ、サン」とリズムを声に出す素振りが効果的です。`);
+        improve.push({ key: 'tempo', html: `<b>切り返しが早い</b>（${fix1(tempo)}:1、理想は約3:1）。トップで「一拍おく」意識や、「イチ、ニノ、サン」とリズムを声に出す素振りが効果的です。` });
       } else {
-        improve.push(`<b>ダウンスイングに対してバックスイングが遅すぎる</b>（${fix1(tempo)}:1、理想は約3:1）。始動をややスムーズにし、全体のリズムを揃えましょう。`);
+        improve.push({ key: 'tempo', html: `<b>ダウンスイングに対してバックスイングが遅すぎる</b>（${fix1(tempo)}:1、理想は約3:1）。始動をややスムーズにし、全体のリズムを揃えましょう。` });
       }
     }
 
@@ -963,11 +1204,11 @@
       const xs = seg.map(d => d.nose.x);
       const sway = ((Math.max(...xs) - Math.min(...xs)) / shW) * 100;
       if (sway < 45) {
-        good.push(`<b>頭の位置が安定</b>：スイング中の頭の左右ブレは肩幅の${Math.round(sway)}%と小さく、軸がしっかりしています。`);
+        good.push({ key: 'head', html: `<b>頭の位置が安定</b>：スイング中の頭の左右ブレは肩幅の${Math.round(sway)}%と小さく、軸がしっかりしています。` });
       } else if (sway < 80) {
-        improve.push(`<b>頭がやや左右に動いています</b>（肩幅の${Math.round(sway)}%）。ボールを右目で見続ける意識（ビハインド・ザ・ボール）を持つと安定します。`);
+        improve.push({ key: 'head', html: `<b>頭がやや左右に動いています</b>（肩幅の${Math.round(sway)}%）。ボールを右目で見続ける意識（ビハインド・ザ・ボール）を持つと安定します。` });
       } else {
-        improve.push(`<b>頭の左右ブレが大きい</b>（肩幅の${Math.round(sway)}%）。壁に頭を付けたつもりで素振りするドリルで、軸ブレを抑えましょう。`);
+        improve.push({ key: 'head', html: `<b>頭の左右ブレが大きい</b>（肩幅の${Math.round(sway)}%）。壁に頭を付けたつもりで素振りするドリルで、軸ブレを抑えましょう。` });
       }
     }
 
@@ -977,9 +1218,9 @@
       const aDeg = spineDeg(A), iDeg = spineDeg(I);
       const diff = Math.abs(aDeg - iDeg);
       if (diff < 10) {
-        good.push(`<b>前傾角度をキープ</b>：アドレス${Math.round(aDeg)}°→インパクト${Math.round(iDeg)}°とほぼ変化なし。ミート率が安定する良い形です。`);
+        good.push({ key: 'spine', html: `<b>前傾角度をキープ</b>：アドレス${Math.round(aDeg)}°→インパクト${Math.round(iDeg)}°とほぼ変化なし。ミート率が安定する良い形です。` });
       } else {
-        improve.push(`<b>前傾角度が${Math.round(diff)}°変化</b>（アドレス${Math.round(aDeg)}°→インパクト${Math.round(iDeg)}°）。${iDeg < aDeg ? '起き上がり傾向です。お尻を壁に付けたまま振るイメージ' : '突っ込み傾向です。頭の高さを保つ意識'}で前傾キープを練習しましょう。`);
+        improve.push({ key: 'spine', html: `<b>前傾角度が${Math.round(diff)}°変化</b>（アドレス${Math.round(aDeg)}°→インパクト${Math.round(iDeg)}°）。${iDeg < aDeg ? '起き上がり傾向です。お尻を壁に付けたまま振るイメージ' : '突っ込み傾向です。頭の高さを保つ意識'}で前傾キープを練習しましょう。` });
       }
     }
 
@@ -989,9 +1230,9 @@
       const xs = seg.map(d => d.hipC.x);
       const sway = ((Math.max(...xs) - Math.min(...xs)) / shW) * 100;
       if (sway < 50) {
-        good.push(`<b>腰の動きは回転主体</b>：バックスイングでの腰の横移動は肩幅の${Math.round(sway)}%と少なく、スウェーせずパワーを溜められています。`);
+        good.push({ key: 'sway', html: `<b>腰の動きは回転主体</b>：バックスイングでの腰の横移動は肩幅の${Math.round(sway)}%と少なく、スウェーせずパワーを溜められています。` });
       } else {
-        improve.push(`<b>バックスイングで腰が横に流れています</b>（肩幅の${Math.round(sway)}%）。軸足の股関節に「乗る」意識で、その場で回転する練習をしましょう。`);
+        improve.push({ key: 'sway', html: `<b>バックスイングで腰が横に流れています</b>（肩幅の${Math.round(sway)}%）。軸足の股関節に「乗る」意識で、その場で回転する練習をしましょう。` });
       }
     }
 
@@ -1000,11 +1241,11 @@
       const torso = Math.hypot(A.shC.x - A.hipC.x, A.shC.y - A.hipC.y) || 1;
       const lift = ((A.hipC.y - I.hipC.y) / torso) * 100; // 正=伸び上がり
       if (Math.abs(lift) < 8) {
-        good.push(`<b>上下動が少ない</b>：インパクトでの腰の高さ変化はわずかで、安定したコンタクトができる土台があります。`);
+        good.push({ key: 'lift', html: `<b>上下動が少ない</b>：インパクトでの腰の高さ変化はわずかで、安定したコンタクトができる土台があります。` });
       } else if (lift > 0) {
-        improve.push(`<b>インパクトで伸び上がっています</b>（腰が胴体長の${Math.round(lift)}%上昇）。トップの高さを保ったまま振り抜く意識や、ハーフスイングでの練習が有効です。`);
+        improve.push({ key: 'lift', html: `<b>インパクトで伸び上がっています</b>（腰が胴体長の${Math.round(lift)}%上昇）。トップの高さを保ったまま振り抜く意識や、ハーフスイングでの練習が有効です。` });
       } else {
-        improve.push(`<b>インパクトで沈み込んでいます</b>（腰が胴体長の${Math.round(-lift)}%下降）。ダフリの原因になりやすいので、下半身の高さを保つ意識を持ちましょう。`);
+        improve.push({ key: 'lift', html: `<b>インパクトで沈み込んでいます</b>（腰が胴体長の${Math.round(-lift)}%下降）。ダフリの原因になりやすいので、下半身の高さを保つ意識を持ちましょう。` });
       }
     }
 
@@ -1013,15 +1254,16 @@
       const tail = sps.slice(iFin, Math.min(sps.length, iFin + 5));
       const calm = tail.every(s => s < vmax * 0.25);
       if (calm) {
-        good.push(`<b>フィニッシュで静止</b>：振り抜いた後にバランス良く立てています。スイング全体のバランスが取れている証拠です。`);
+        good.push({ key: 'finish', html: `<b>フィニッシュで静止</b>：振り抜いた後にバランス良く立てています。スイング全体のバランスが取れている証拠です。` });
       } else {
-        improve.push(`<b>フィニッシュがふらついています</b>。フィニッシュで3秒静止する練習をすると、スイング全体のバランスが整います。`);
+        improve.push({ key: 'finish', html: `<b>フィニッシュがふらついています</b>。フィニッシュで3秒静止する練習をすると、スイング全体のバランスが整います。` });
       }
     }
 
     return { phases, good, improve };
   }
   window._computeSwingReport = computeSwingReport; // 検証用フック
+  window._lesson = lesson; // 検証用フック
 
   // ---- プレイヤー生成 ----
   const playersWrap = document.getElementById('players');
@@ -1033,6 +1275,7 @@
   });
   players[0].root.classList.add('visible');
   let activePlayer = players[0];
+  window._players = players; // 検証用フック
 
   // ---- モード切替 ----
   const modeSingle = document.getElementById('modeSingle');
