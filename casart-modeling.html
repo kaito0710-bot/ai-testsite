@@ -110,7 +110,7 @@
     <section class="case-hero">
       <span class="badge">Blender × Claude Code (MCP)</span>
       <h1>実在モデルハウスを参考にした3Dモデリング検証<br>— パナソニック ホームズ「カサート プレミアム」風</h1>
-      <p class="meta">検証日: 2026-07-16 〜 07-17 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender 5.1 + blender-mcp ／ 4回のプロンプトで昼景フォトリアル → 夕景ライティングまで段階的にブラッシュアップ</p>
+      <p class="meta">検証日: 2026-07-16 〜 07-17（アップデート: <a href="#update-night" style="color:var(--primary)">夜景・室内家具ほか</a>）／ 使用モデル: Claude Fable 5 ／ 環境: Blender 5.1 + blender-mcp ／ 5回のプロンプトで昼景フォトリアル → 夕景 → 完全夜景まで段階的にブラッシュアップ</p>
     </section>
 
     <section class="section" style="padding-top:1rem">
@@ -134,6 +134,11 @@
 ・夕景ライティング
 ・玄関まわりの植栽追加
 ・内観ライトの点灯表現</pre>
+      </div>
+      <div class="prompt-box">
+        <div class="label">PROMPT 5 — 夜景・室内・路面・アングル</div>
+        <pre>下記も修正して
+完全な夜景バージョン、窓越しに見える家具の配置、雨上がりの濡れた路面表現、広角の見上げアングル追加</pre>
       </div>
       <p style="max-width:900px;margin:1rem auto 0;font-size:0.88rem;color:var(--text-muted)">
         ※ Web検索でパナソニック ホームズの最上位商品「カサート プレミアム」（キラテック光触媒タイル外壁・フラットルーフ・大開口）を特定し、その特徴をもとにモデリング。
@@ -173,7 +178,29 @@
       </ul>
     </section>
 
-    <section class="section alt">
+    <section class="section alt" id="update-night">
+      <h2>アップデート（2026-07-17）— 完全夜景・室内家具・濡れた路面・広角アングル</h2>
+      <p style="max-width:900px;margin:0 auto 1.5rem;font-size:0.9rem;color:var(--text-muted)">
+        夕景版をベースに、星空の完全夜景へ移行。1階リビングを実際に掘り込んで家具を配置し、雨上がりの路面と広角の見上げ構図を追加しました。
+      </p>
+      <figure class="result-figure">
+        <img src="images/casart_v5_night.jpg" alt="完全夜景のメインアングル。窓越しに家具が見える" loading="lazy">
+        <figcaption>完全夜景（メインアングル）— ガラス越しにソファ・ダイニング・ペンダントライトが見える。濡れたアプローチにボラードライトが映り込む</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/casart_v6_night_wide.jpg" alt="星空を背景にした広角見上げアングル" loading="lazy">
+        <figcaption>広角見上げアングル（16mm・地上1.1m）— 星空HDRIとバルコニーの裏側、点灯した室内が迫る構図</figcaption>
+      </figure>
+      <h3 style="max-width:900px;margin:2rem auto 1rem;font-size:1.05rem">主な更新内容</h3>
+      <ul class="feature-list">
+        <li><b>完全な夜景</b> — 夜空HDRI（星空・天の川）に差し替え、月明かり相当の青いリムライトのみ残す。隣家にも窓明かり12箇所を配置</li>
+        <li><b>窓越しの家具</b> — 1階リビングをブーリアンで2.7m掘り込み、フローリング・壁・天井を造作。ソファ・ラグ・ダイニングセット・TVボード・ペンダント・フロアランプ＋実光源を配置</li>
+        <li><b>雨上がりの濡れた路面</b> — ノイズベースの水たまりマスクで部分的に鏡面化し、ベース色も濡れ色に。新設した街路灯や庭園灯の光が路面に映り込む</li>
+        <li><b>広角見上げカメラ</b> — 16mmの2本目カメラを追加し、メインアングルと見上げ構図の2枚看板に</li>
+      </ul>
+    </section>
+
+    <section class="section">
       <h2>技術トピック</h2>
       <ul class="feature-list">
         <li><b>Blender 5.1 対応</b> — 物理スカイ（MULTIPLE_SCATTERING）は実測光量のため露出補正が必須、Glareノードのオプションが入力ソケット化、コンポジターが scene.compositing_node_group 方式に変更など、新APIの差分を実地で吸収</li>
