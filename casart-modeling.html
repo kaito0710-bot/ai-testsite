@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blender × Claude Code — パナソニック ホームズ カサート プレミアム風モデリング検証 | AI Tech Lab</title>
+  <meta name="description" content="パナソニック ホームズの最上位商品「カサート プレミアム」のモデルハウスをClaude Fable 5 + blender-mcpで再現した検証記録。キラテックタイル外壁・窓の掘り込み・リーフインスタンス植栽・夕景HDRIライティングまで対話のみで到達。">
+  <meta property="og:title" content="実在モデルハウスの3D再現 — カサート プレミアム風 | AI Tech Lab">
+  <meta property="og:description" content="パナソニック ホームズ「カサート プレミアム」をBlenderで再現。昼景フォトリアルから夕景（マジックアワー）ライティングまで、すべてClaude Fable 5との対話のみで完結。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://kaito0710-bot.github.io/ai-testsite/casart-modeling.html">
+  <meta property="og:image" content="https://kaito0710-bot.github.io/ai-testsite/images/casart_v4_dusk.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .case-hero {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 2rem;
+    }
+    .case-hero h1 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+    .case-hero .meta {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .prompt-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto 1rem;
+    }
+    .prompt-box .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+    .prompt-box pre {
+      white-space: pre-wrap;
+      font-family: 'Consolas', 'SF Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .result-figure {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+    }
+    .result-figure img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+    .result-figure figcaption {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .feature-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.75rem;
+      list-style: none;
+    }
+    .feature-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.88rem;
+    }
+    .feature-list li b { color: var(--primary); }
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo"><a href="index.html" style="color:inherit;text-decoration:none">AI Tech Lab</a></div>
+      <ul>
+        <li><a href="index.html#about">概要</a></li>
+        <li><a href="index.html#works">検証事例</a></li>
+        <li><a href="index.html#tools">検証ツール</a></li>
+        <li><a href="index.html#log">検証ログ</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="case-hero">
+      <span class="badge">Blender × Claude Code (MCP)</span>
+      <h1>実在モデルハウスを参考にした3Dモデリング検証<br>— パナソニック ホームズ「カサート プレミアム」風</h1>
+      <p class="meta">検証日: 2026-07-16 〜 07-17 ／ 使用モデル: Claude Fable 5 ／ 環境: Blender 5.1 + blender-mcp ／ 4回のプロンプトで昼景フォトリアル → 夕景ライティングまで段階的にブラッシュアップ</p>
+    </section>
+
+    <section class="section" style="padding-top:1rem">
+      <h2>プロンプトの流れ</h2>
+      <div class="prompt-box">
+        <div class="label">PROMPT 1 — 調査＆モデリング</div>
+        <pre>パナソニックホームズのモデルハウスで一番有名なモデルハウスを調べてBlenderでモデリングして</pre>
+      </div>
+      <div class="prompt-box">
+        <div class="label">PROMPT 2 — フォトリアル化</div>
+        <pre>ビエナでブラッシュアップしたようにもっとフォトリアルにブラッシュアップして</pre>
+      </div>
+      <div class="prompt-box">
+        <div class="label">PROMPT 3 — 要素別ディテールアップ</div>
+        <pre>バルコニー、ガラス、屋根、壁、樹木などをもっとリアルな表現にして</pre>
+      </div>
+      <div class="prompt-box">
+        <div class="label">PROMPT 4 — 環境ライティング</div>
+        <pre>下記あたりをさらにブラッシュアップして
+・空をHDRIに変更
+・夕景ライティング
+・玄関まわりの植栽追加
+・内観ライトの点灯表現</pre>
+      </div>
+      <p style="max-width:900px;margin:1rem auto 0;font-size:0.88rem;color:var(--text-muted)">
+        ※ Web検索でパナソニック ホームズの最上位商品「カサート プレミアム」（キラテック光触媒タイル外壁・フラットルーフ・大開口）を特定し、その特徴をもとにモデリング。
+        「ビエナ」は<a href="biena-modeling.html" style="color:var(--primary)">過去セッションの検証</a>を指しており、AIが過去セッションの transcript を検索してブラッシュアップ手法（パーティクル芝・背景の隣家・DoF・グレア等）を自力で再確認してから作業に入った点もポイント。
+      </p>
+    </section>
+
+    <section class="section alt">
+      <h2>結果（レンダリング）</h2>
+      <figure class="result-figure">
+        <img src="images/casart_v4_dusk.jpg" alt="カサート プレミアム風モデルハウスの夕景レンダリング" loading="lazy">
+        <figcaption>最終形 — 夕景（マジックアワー）。サンセットHDRI＋内観ライト点灯＋玄関灯・ダウンライト・ボラードライト</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/casart_v3_details.jpg" alt="ディテールアップ後の昼景レンダリング" loading="lazy">
+        <figcaption>昼景・ディテールアップ版 — 窓の掘り込み（リベート）、ガラス手すりバルコニー、笠木、リーフインスタンスの樹木</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/casart_v2_photoreal.jpg" alt="フォトリアル化第1弾のレンダリング" loading="lazy">
+        <figcaption>フォトリアル化第1弾 — Cycles＋物理スカイ、UVキューブ投影のタイル目地、ジオメトリノード芝、背景の隣家</figcaption>
+      </figure>
+      <figure class="result-figure">
+        <img src="images/casart_v1_eevee.jpg" alt="初回モデリングのEEVEEレンダリング" loading="lazy">
+        <figcaption>初回モデリング（PROMPT 1 の出力）— EEVEEによるボリューム確認レベル。ここから3段階でブラッシュアップ</figcaption>
+      </figure>
+    </section>
+
+    <section class="section">
+      <h2>再現した カサート プレミアム の特徴</h2>
+      <ul class="feature-list">
+        <li><b>キラテック（光触媒タイル）外壁</b> — ブリックテクスチャ＋バンプで小口タイルの目地まで表現。UVキューブ投影で側面の縞崩れを解消</li>
+        <li><b>フラットルーフの箱型コンポジション</b> — タイル棟＋白壁棟の2ボリューム構成、パラペットにアルミ笠木</li>
+        <li><b>大開口</b> — 1階リビング全面ガラス＋2階横連窓。ブーリアンで壁を掘り込み、奥行きのあるリベートと影を再現</li>
+        <li><b>ガラス手すりバルコニー</b> — すりガラスパネル＋アルミ支柱＋ハンドレール</li>
+        <li><b>深い庇と玄関キャノピー</b> — 木目の玄関ドア、玄関灯、表札、ドアマット</li>
+        <li><b>外構</b> — 目地入り駐車場、縁石付きアプローチ、境界壁＋看板、前面道路</li>
+      </ul>
+    </section>
+
+    <section class="section alt">
+      <h2>技術トピック</h2>
+      <ul class="feature-list">
+        <li><b>Blender 5.1 対応</b> — 物理スカイ（MULTIPLE_SCATTERING）は実測光量のため露出補正が必須、Glareノードのオプションが入力ソケット化、コンポジターが scene.compositing_node_group 方式に変更など、新APIの差分を実地で吸収</li>
+        <li><b>旧パーティクルヘアーの非描画</b> — Blender 5のCyclesで芝のヘアーパーティクルが描画されず、ジオメトリノード（Distribute Points on Faces ＋ Instance on Points）による草株3万個の散布に切り替え</li>
+        <li><b>リーフインスタンスの樹木</b> — ディスプレイスした樹冠メッシュの表面に1本あたり数千枚のリーフカードをGNで散布。低木・生垣・シンボルツリーにも同じノードグループを再利用</li>
+        <li><b>HDRI太陽位置の自動解析</b> — HDRI画像のピクセルをnumpyで解析して最も明るい方位を特定し、夕焼けが建物の背後に来るようワールド回転を計算</li>
+        <li><b>内観ライトの点灯表現</b> — ノイズテクスチャで「部屋ごとの明るさムラ」を持つ発光マテリアル＋カーテン越しの透過光。実光源（ダウンライト・ボラード）とBloomで光のにじみを追加</li>
+        <li><b>クラッシュからの復旧</b> — 作業中にBlenderが再起動されシーンが初期化されたが、直前に保存していた.blendから全121オブジェクトをアペンドして完全復旧。「こまめな保存」の重要性を再確認</li>
+      </ul>
+      <div style="max-width:900px;margin:0 auto">
+        <a class="back-link" href="index.html">← トップページに戻る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>AI Tech Lab &copy; 2026 — Built with Claude Code</p>
+  </footer>
+</body>
+</html>
